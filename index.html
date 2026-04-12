@@ -1,0 +1,1970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ZAR RATES DESK · ZARONIA OIS · JIBAR · BASIS</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#02020a;--bg1:#06060f;--bg2:#0a0a16;--bg3:#0e0e1e;--bg4:#121224;
+  --bd:#181830;--bd2:#1e1e36;--bd3:#26263c;
+  /* HIGH CONTRAST PALETTE — WCAG AA+ on dark backgrounds */
+  --neon:#00ffe5;        /* ZARONIA / OIS — bright teal */
+  --blue:#29b6f6;        /* JIBAR — sky blue */
+  --amber:#ffd54f;       /* FRAs / warnings — bright yellow-amber */
+  --red:#ff5370;         /* negative / risk — coral red */
+  --green:#69ff47;       /* positive / green — lime green */
+  --purple:#ea80fc;      /* repo / greeks — bright magenta-purple */
+  --cyan:#40c4ff;        /* secondary highlights */
+  --lime:#ccff90;        /* convexity / misc */
+  --pink:#ff80ab;        /* scenario */
+  --orange:#ffab40;      /* basis spreads */
+  /* TEXT — high contrast greys */
+  --t0:#f0f0ff;          /* primary text — near white with slight blue */
+  --t1:#b0b0d0;          /* secondary text */
+  --t2:#6868a0;          /* muted / labels */
+  --t3:#2a2a48;          /* very dim */
+  --mono:'JetBrains Mono',monospace;
+  --sb:275px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--t0);font-family:var(--mono);font-size:11px;line-height:1.4}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.06) 3px,rgba(0,0,0,.06) 4px);pointer-events:none;z-index:900}
+
+/* ── HEADER ── */
+.hdr{height:36px;background:var(--bg1);border-bottom:1px solid var(--bd2);display:flex;align-items:center;padding:0 12px;gap:10px;flex-shrink:0;z-index:10}
+.logo{font-size:12px;font-weight:700;color:var(--neon);letter-spacing:.14em;text-shadow:0 0 18px rgba(0,255,204,.35)}
+.hsep{width:1px;height:16px;background:var(--bd3)}
+.hsub{font-size:9px;color:var(--t2);letter-spacing:.07em}
+.hml{margin-left:auto;display:flex;align-items:center;gap:8px}
+.hbadge{font-size:8px;color:var(--t2);background:var(--bg3);border:1px solid var(--bd2);padding:1px 7px;border-radius:1px;letter-spacing:.09em}
+.hdot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.8s infinite}
+.hdot.busy{background:var(--amber);animation:spin .5s linear infinite}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 5px var(--green)}50%{opacity:.3;box-shadow:none}}
+@keyframes spin{0%{opacity:1}50%{opacity:.3}100%{opacity:1}}
+.hclock{font-size:10px;color:var(--neon);font-weight:600;letter-spacing:.05em}
+
+/* ── LAYOUT ── */
+.lay{display:grid;grid-template-columns:var(--sb) 1fr;height:calc(100vh - 58px)}
+.sb{background:var(--bg1);border-right:1px solid var(--bd2);overflow-y:auto;padding:10px}
+.sb::-webkit-scrollbar{width:3px}
+.sb::-webkit-scrollbar-thumb{background:var(--bd3);border-radius:2px}
+.main{overflow:hidden;display:flex;flex-direction:column}
+
+/* ── TABS ── */
+.tabs{display:flex;background:var(--bg1);border-bottom:1px solid var(--bd2);flex-shrink:0;overflow-x:auto}
+.tabs::-webkit-scrollbar{height:0}
+.tab{padding:7px 14px;font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
+.tab:hover{color:var(--t1)}
+.tab.on{color:var(--neon);border-bottom-color:var(--neon);background:rgba(0,255,204,.025)}
+.tc{display:none;overflow-y:auto;flex:1;padding:11px;gap:11px;flex-direction:column}
+.tc.on{display:flex}
+.tc::-webkit-scrollbar{width:3px}
+.tc::-webkit-scrollbar-thumb{background:var(--bd3)}
+
+/* ── SECTION HEADER ── */
+.sh{font-size:8px;font-weight:700;letter-spacing:.14em;color:var(--t2);text-transform:uppercase;padding-bottom:5px;margin-bottom:8px;display:flex;align-items:center;gap:5px;border-bottom:1px solid var(--bd)}
+.sa{width:3px;height:9px;border-radius:1px;background:var(--neon)}
+.sa.am{background:var(--amber)}.sa.bl{background:var(--blue)}.sa.pu{background:var(--purple)}.sa.re{background:var(--red)}.sa.gr{background:var(--green)}.sa.cy{background:var(--cyan)}.sa.lm{background:var(--lime)}
+
+/* ── INPUTS ── */
+.ig{margin-bottom:10px}
+.ir{display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.il{flex:0 0 82px;font-size:9px;color:var(--t1)}
+.if{flex:1;background:var(--bg);border:1px solid var(--bd3);color:var(--neon);font-family:var(--mono);font-size:10px;font-weight:500;padding:3px 6px;outline:none;border-radius:1px;text-align:right;transition:all .12s;min-width:0}
+.if:focus{border-color:var(--neon);box-shadow:0 0 0 1px rgba(0,255,204,.12)}
+.if.fl{color:var(--amber)} /* float leg color */
+.if.jb{color:var(--blue)}  /* jibar */
+.if.rp{color:var(--purple)} /* repo */
+select.if{color:var(--amber)}
+.iu{width:18px;font-size:8px;color:var(--t2)}
+.changed{border-color:var(--amber)!important;animation:fl .4s ease}
+@keyframes fl{0%{background:rgba(255,170,48,.18)}100%{background:transparent}}
+
+/* ── KPI GRIDS ── */
+.kg{display:grid;gap:6px}
+.kg.c4{grid-template-columns:repeat(4,1fr)}
+.kg.c5{grid-template-columns:repeat(5,1fr)}
+.kg.c6{grid-template-columns:repeat(6,1fr)}
+.kg.c7{grid-template-columns:repeat(7,1fr)}
+.kc{background:var(--bg2);border:1px solid var(--bd);padding:8px 10px;border-radius:1px;position:relative;overflow:hidden}
+.kc::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;opacity:.4}
+.kc.n::after{background:var(--neon)}.kc.a::after{background:var(--amber)}.kc.b::after{background:var(--blue)}
+.kc.g::after{background:var(--green)}.kc.p::after{background:var(--purple)}.kc.r::after{background:var(--red)}
+.kc.c::after{background:var(--cyan)}.kc.l::after{background:var(--lime)}
+.kl{font-size:8px;color:var(--t2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
+.kv{font-size:13px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;transition:color .3s}
+.kv.lg{font-size:16px}
+.kv.n{color:var(--neon)}.kv.a{color:var(--amber)}.kv.b{color:var(--blue)}
+.kv.g{color:var(--green)}.kv.p{color:var(--purple)}.kv.r{color:var(--red)}
+.kv.c{color:var(--cyan)}.kv.l{color:var(--lime)}
+.ks{font-size:8px;color:var(--t1);margin-top:3px}
+
+/* ── CHARTS ── */
+.cg{display:grid;gap:10px}
+.cg.c2{grid-template-columns:1fr 1fr}
+.cg.c3{grid-template-columns:1fr 1fr 1fr}
+.cb{background:var(--bg2);border:1px solid var(--bd);border-radius:1px;padding:9px 11px;display:flex;flex-direction:column}
+.ct{font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t2);margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.cd{width:4px;height:4px;border-radius:50%}
+.cw{position:relative;width:100%}
+.cw canvas{display:block;width:100%!important}
+
+/* ── TABLES ── */
+.tw{background:var(--bg2);border:1px solid var(--bd);border-radius:1px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead tr{background:var(--bg3)}
+th{font-size:8px;font-weight:700;color:var(--t2);letter-spacing:.1em;text-transform:uppercase;padding:5px 7px;text-align:right;border-bottom:1px solid var(--bd2)}
+th:first-child{text-align:left}
+tbody tr{border-bottom:1px solid rgba(22,22,38,.9);transition:background .08s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.022)}
+td{padding:4px 7px;text-align:right;font-size:10px;color:#e8e8ff;font-variant-numeric:tabular-nums}
+td:first-child{text-align:left;color:#a0a0c8}
+.cn{color:var(--neon)}.ca{color:var(--amber)}.cb2{color:var(--blue)}.cg2{color:var(--green)}.cr{color:var(--red)}.cd2{color:var(--t2)}.cp{color:var(--purple)}.cc{color:var(--cyan)}.cl{color:var(--lime)}
+
+/* ── SPREAD TILES ── */
+.stg{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.st{background:var(--bg2);border:1px solid var(--bd);padding:8px 7px;border-radius:1px;text-align:center}
+.st.hi{border-color:rgba(0,255,204,.25)}
+.stl{font-size:8px;color:var(--t2);margin-bottom:3px;letter-spacing:.06em}
+.stv{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.sts{font-size:8px;color:var(--t2);margin-top:2px}
+
+/* ── HEATMAP ── */
+.hmc{font-size:9px;font-weight:600;font-family:var(--mono);padding:4px 6px;text-align:center;border-radius:1px;min-width:56px;font-variant-numeric:tabular-nums}
+.hml2{font-size:8px;color:var(--t2);padding:3px 7px;text-align:right;font-weight:600}
+
+/* ── STATUS BAR ── */
+.sbar{height:22px;background:var(--bg1);border-top:1px solid var(--bd2);display:flex;align-items:center;padding:0 12px;gap:16px;font-size:8px;color:var(--t2);flex-shrink:0;letter-spacing:.05em}
+.sbi span{color:var(--t1)}
+
+/* ── LOG ── */
+.log{background:var(--bg);border:1px solid var(--bd);border-radius:1px;padding:8px 10px;font-size:9px;color:var(--t1);line-height:2;max-height:160px;overflow-y:auto}
+.log::-webkit-scrollbar{width:2px}
+.log::-webkit-scrollbar-thumb{background:var(--bd3)}
+.lk{color:var(--t2)}.lv{color:var(--neon)}.ls{color:var(--amber);font-weight:700}
+
+/* ── FLASH ── */
+@keyframes flash{0%{opacity:.3}60%{opacity:1}100%{opacity:.3}}
+.flash{animation:flash .3s ease 2}
+
+/* ── MATH ANNOTATION PANELS ── */
+.math-box{background:var(--bg3);border:1px solid var(--bd2);border-left:3px solid var(--amber);border-radius:1px;padding:10px 14px;margin-bottom:8px;font-size:9.5px;line-height:1.9;color:var(--t1)}
+.math-box h4{color:var(--amber);font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;font-weight:700}
+.math-box .fm{color:var(--neon);font-size:10px;font-weight:600;background:rgba(0,255,229,.05);padding:3px 8px;border-radius:1px;display:block;margin:3px 0}
+.math-box .ref{color:var(--t2);font-size:8.5px;font-style:italic}
+.math-box strong{color:var(--t0)}
+.math-box hr{border:none;border-top:1px solid var(--bd2);margin:7px 0}
+.math-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.math-grid .math-box{margin-bottom:0}
+.sprd-pos{color:#69ff47;font-weight:700}
+.sprd-neg{color:#ff5370;font-weight:700}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdot" id="dot"></div>
+  <div class="logo">ZAR RATES DESK</div>
+  <div class="hsep"></div>
+  <div class="hsub">ZARONIA OIS · JIBAR VANILLA · OIS/JIBAR BASIS · REPO CURVE · IMPLIED FORWARDS</div>
+  <div class="hml">
+    <span class="hbadge">QUANTLIB OIS · ACT/365F</span>
+    <span class="hbadge" id="repriceMs" style="color:var(--amber)">—ms</span>
+    <span class="hclock" id="clk">—</span>
+  </div>
+</div>
+
+<div class="lay">
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<div class="sb">
+
+  <div class="ig">
+    <div class="sh"><span class="sa rp"></span>SARB / Money Market</div>
+    <div class="ir"><span class="il">Repo NACM</span>
+      <input class="if rp" id="repo" type="number" step="0.01" value="6.75"><span class="iu">%</span></div>
+    <div class="ir"><span class="il">ZARONIA O/N</span>
+      <input class="if" id="zaronia" type="number" step="0.01" value="6.60"><span class="iu">%</span></div>
+    <div class="ir"><span class="il">JIBAR 3M</span>
+      <input class="if jb" id="jibar3m" type="number" step="0.01" value="6.76"><span class="iu">%</span></div>
+  </div>
+
+  <div class="ig">
+    <div class="sh"><span class="sa am"></span>FRA Strip (JIBAR-based)</div>
+    <div class="ir"><span class="il">3×6</span>
+      <input class="if fl" id="fra_36" type="number" step="0.01" value="6.99"><span class="iu">%</span></div>
+    <div class="ir"><span class="il">6×9</span>
+      <input class="if fl" id="fra_69" type="number" step="0.01" value="7.20"><span class="iu">%</span></div>
+    <div class="ir"><span class="il">9×12</span>
+      <input class="if fl" id="fra_912" type="number" step="0.01" value="7.27"><span class="iu">%</span></div>
+    <div class="ir"><span class="il">18×21</span>
+      <input class="if fl" id="fra_1821" type="number" step="0.01" value="7.07"><span class="iu">%</span></div>
+  </div>
+
+  <div class="ig">
+    <div class="sh"><span class="sa bl"></span>JIBAR Vanilla Swap Rates (NACQ)</div>
+    <div class="ir"><span class="il">SASW1</span>
+      <input class="if jb" id="sw_j1" type="number" step="0.001" value="7.055"><span class="iu">%</span></div>
+    <div class="ir"><span class="il">SASW2</span>
+      <input class="if jb" id="sw_j2" type="number" step="0.001" value="7.080"><span class="iu">%</span></div>
+    <div class="ir"><span class="il">SASW3</span>
+      <input class="if jb" id="sw_j3" type="number" step="0.001" value="7.110"><span class="iu">%</span></div>
+    <div class="ir"><span class="il">SASW5</span>
+      <input class="if jb" id="sw_j5" type="number" step="0.001" value="7.260"><span class="iu">%</span></div>
+    <div class="ir"><span class="il">SASW10</span>
+      <input class="if jb" id="sw_j10" type="number" step="0.001" value="7.900"><span class="iu">%</span></div>
+  </div>
+
+  <div class="ig">
+    <div class="sh"><span class="sa"></span>ZARONIA OIS Swap Rates (NACQ)</div>
+    <div class="ir"><span class="il">OIS 1Y</span>
+      <input class="if" id="ois_1" type="number" step="0.001" value="7.18"><span class="iu">%</span></div>
+    <div class="ir"><span class="il">OIS 2Y</span>
+      <input class="if" id="ois_2" type="number" step="0.001" value="7.52"><span class="iu">%</span></div>
+    <div class="ir"><span class="il">OIS 3Y</span>
+      <input class="if" id="ois_3" type="number" step="0.001" value="7.68"><span class="iu">%</span></div>
+    <div class="ir"><span class="il">OIS 4Y</span>
+      <input class="if" id="ois_4" type="number" step="0.001" value="7.78"><span class="iu">%</span></div>
+    <div class="ir"><span class="il">OIS 5Y</span>
+      <input class="if" id="ois_5" type="number" step="0.001" value="7.85"><span class="iu">%</span></div>
+  </div>
+
+  <div class="ig">
+    <div class="sh"><span class="sa pu"></span>Pricer — Single Swap</div>
+    <div class="ir"><span class="il">Tenor</span>
+      <select class="if" id="swTenor" style="color:var(--purple)">
+        <option value="0.5">6M</option>
+        <option value="1" selected>1Y</option>
+        <option value="1.5">18M</option>
+        <option value="2">2Y</option>
+        <option value="3">3Y</option>
+        <option value="4">4Y</option>
+        <option value="5">5Y</option>
+      </select><span class="iu"></span></div>
+    <div class="ir"><span class="il">Notional</span>
+      <input class="if" id="notional" type="number" step="10000000" value="500000000"><span class="iu"></span></div>
+    <div class="ir"><span class="il">Fixed NACQ</span>
+      <input class="if" id="fixedRate" type="number" step="0.01" value="7.25"><span class="iu">%</span></div>
+    <div class="ir"><span class="il">Direction</span>
+      <select class="if" id="direction">
+        <option value="1">PAY FIXED</option>
+        <option value="-1">RCV FIXED</option>
+      </select><span class="iu"></span></div>
+  </div>
+
+  <div class="ig">
+    <div class="sh"><span class="sa re"></span>Basis Assumption</div>
+    <div class="ir"><span class="il">OIS/JIBAR basis</span>
+      <input class="if" id="basis" type="number" step="0.5" value="-15" style="color:var(--red)"><span class="iu">bp</span></div>
+    <div style="font-size:8px;color:var(--t2);line-height:1.6;padding:4px 0">
+      Constant basis applied to derive ZARONIA fair rates from JIBAR curve. Fair ZARONIA = Fair JIBAR + basis/100.
+    </div>
+  </div>
+
+  <div class="ig">
+    <div class="sh"><span class="sa"></span>Log</div>
+    <div class="log" id="log">—</div>
+  </div>
+
+</div><!-- /sidebar -->
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div class="main">
+<div class="tabs">
+  <div class="tab on"  onclick="sw('overview',this)">OVERVIEW</div>
+  <div class="tab" onclick="sw('ois',this)">OIS PRICER</div>
+  <div class="tab" onclick="sw('jibar',this)">JIBAR CURVE</div>
+  <div class="tab" onclick="sw('basis',this)">OIS/JIBAR BASIS</div>
+  <div class="tab" onclick="sw('forwards',this)">IMPLIED FORWARDS</div>
+  <div class="tab" onclick="sw('repo',this)">REPO / SARB</div>
+  <div class="tab" onclick="sw('scenario',this)">SCENARIO</div>
+  <div class="tab" onclick="sw('frn',this)" style="color:var(--lime)">FRN PRICER</div>
+</div>
+
+<!-- ── OVERVIEW ── -->
+<div class="tc on" id="tc-overview">
+  <div class="sh"><span class="sa"></span>OIS Swap Strip — Fair NACQ vs ZARONIA Daily Compounded, Paid Quarterly</div>
+  <div id="ois-strip-kpi"></div>
+
+  <div class="sh" style="margin-top:4px"><span class="sa bl"></span>JIBAR Vanilla Swap Strip — Fair NACQ</div>
+  <div id="jibar-strip-kpi"></div>
+
+  <div class="cg c2">
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--neon)"></span>OIS Fair Rate Curve (%)</div>
+      <div class="cw" style="height:180px"><canvas id="c-ois-strip"></canvas></div>
+    </div>
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--blue)"></span>JIBAR Fair Rate Curve (%)</div>
+      <div class="cw" style="height:180px"><canvas id="c-jib-strip"></canvas></div>
+    </div>
+  </div>
+
+  <div class="cg c2">
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--red)"></span>OIS/JIBAR Basis Spread (bp)</div>
+      <div class="cw" style="height:160px"><canvas id="c-basis-overview"></canvas></div>
+    </div>
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--amber)"></span>Implied Forward ZARONIA vs JIBAR (%)</div>
+      <div class="cw" style="height:160px"><canvas id="c-fwd-overview"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── OIS PRICER ── -->
+<div class="tc" id="tc-ois">
+  <div>
+    <div class="sh"><span class="sa"></span>Single Swap Valuation</div>
+    <div class="kg c5" id="ois-kpi"></div>
+  </div>
+  <div>
+    <div class="sh" style="margin-top:4px"><span class="sa am"></span>Rate Sensitivity</div>
+    <div class="kg c5" id="ois-greeks"></div>
+  </div>
+  <div class="cg c2">
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--neon)"></span>Discount Factor — OIS Curve</div>
+      <div class="cw" style="height:180px"><canvas id="c-ois-df"></canvas></div>
+    </div>
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--purple)"></span>NPV vs Rate Shift (ZAR m)</div>
+      <div class="cw" style="height:180px"><canvas id="c-ois-npv"></canvas></div>
+    </div>
+  </div>
+  <div class="cg c2">
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--green)"></span>Cashflow Profile — Fixed &amp; Float</div>
+      <div class="cw" style="height:170px"><canvas id="c-ois-cf"></canvas></div>
+    </div>
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--amber)"></span>PV01 / CS01 Attribution by Quarter</div>
+      <div class="cw" style="height:170px"><canvas id="c-ois-risk"></canvas></div>
+    </div>
+  </div>
+  <div>
+    <div class="sh"><span class="sa"></span>Full Cashflow Schedule</div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th>Qtr</th><th>Leg</th><th>Start</th><th>End</th><th>DCF</th>
+        <th>Fwd NACC%</th><th>Comp Factor</th><th>Cashflow (ZAR)</th><th>DF</th><th>PV (ZAR)</th><th>CS01</th>
+      </tr></thead>
+      <tbody id="tb-ois-cf"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ── JIBAR CURVE ── -->
+<div class="tc" id="tc-jibar">
+  <div class="cg c3">
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--blue)"></span>JIBAR Discount Factor</div>
+      <div class="cw" style="height:180px"><canvas id="c-jib-df"></canvas></div>
+    </div>
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--cyan)"></span>JIBAR Zero Rate NACC (%)</div>
+      <div class="cw" style="height:180px"><canvas id="c-jib-zero"></canvas></div>
+    </div>
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--amber)"></span>JIBAR Forward Rate NACC (%)</div>
+      <div class="cw" style="height:180px"><canvas id="c-jib-fwd"></canvas></div>
+    </div>
+  </div>
+  <div>
+    <div class="sh"><span class="sa bl"></span>JIBAR Bootstrapped Curve — Full Term Structure</div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th>Period</th><th>Tenor(y)</th><th>Instrument</th><th>Mkt Rate%</th>
+        <th>Fwd NACC%</th><th>Zero NACC%</th><th>DF</th><th>Par Rate%</th>
+      </tr></thead>
+      <tbody id="tb-jib-curve"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ── BASIS ── -->
+<div class="tc" id="tc-basis">
+  <div class="sh"><span class="sa re"></span>ZARONIA / JIBAR Basis — OIS vs JIBAR Fair NACQ Swap Rates</div>
+
+  <div class="math-grid">
+    <div class="math-box">
+      <h4>📐 OIS / IBOR Basis Theory</h4>
+      Post-2008, OIS and IBOR rates diverged due to <strong>credit and liquidity risk</strong> embedded in panel-bank IBOR fixings (Mercurio, 2009; Bianchetti, 2010). This gave rise to <strong>multi-curve pricing</strong>.
+      <span class="fm">Basis (bp) = Fair_OIS_NACQ − Fair_JIBAR_NACQ) × 100</span>
+      In ZAR: ZARONIA (risk-free, overnight compounded) trades below JIBAR 3M (credit-risky, term rate) — hence <strong>negative basis</strong> is normal. The spread represents the JIBAR <strong>term/credit premium</strong>.
+      <span class="ref">Ref: Mercurio (2009) "Interest Rates and the Credit Crunch"; Bianchetti (2010)</span>
+    </div>
+    <div class="math-box">
+      <h4>🔁 QuantLib Multi-Curve Bootstrap</h4>
+      QuantLib separates <strong>discounting curve</strong> (OIS/CSA) from <strong>projection curve</strong> (JIBAR):
+      <span class="fm">oisCurve  → discounts all cashflows via DF_ois(t)</span>
+      <span class="fm">jibarCurve → projects JIBAR 3M forwards via DF_jib(t)</span>
+      Fair NACQ rate for OIS tenor T:
+      <span class="fm">r_fair = [ N·(1−DF_ois(T)) / (N·Σᵢ DF_ois(tᵢ)) ] × 4</span>
+      Fair NACQ for JIBAR swap (same formula, JIBAR DFs):
+      <span class="fm">r_fair = [ (1−DF_jib(T)) / Σᵢ DF_jib(tᵢ) ] × 4</span>
+      <span class="ref">Ref: QuantLib MakeVanillaSwap; Ametrano &amp; Bianchetti (2013)</span>
+    </div>
+  </div>
+
+  <div id="basis-strip"></div>
+
+  <div class="cg c2" style="margin-top:8px">
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--neon)"></span>OIS vs JIBAR Fair Rates (%)</div>
+      <div class="cw" style="height:200px"><canvas id="c-basis-rates"></canvas></div>
+    </div>
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--red)"></span>OIS/JIBAR Basis Spread by Tenor (bp) — negative = OIS below JIBAR</div>
+      <div class="cw" style="height:200px"><canvas id="c-basis-bp"></canvas></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="sh"><span class="sa re"></span>Basis Detail Table — All Spreads in Basis Points · bp = (OIS−JIBAR)×100</div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th>Tenor</th><th>JIBAR Fair NACQ%</th><th>OIS Fair NACQ%</th>
+        <th>Basis (bp)</th><th>JIBAR DF(T)</th><th>OIS DF(T)</th>
+        <th>JIBAR PV01 (ZAR)</th><th>OIS PV01 (ZAR)</th><th>DF Spread (bp)</th>
+      </tr></thead>
+      <tbody id="tb-basis"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ── IMPLIED FORWARDS ── -->
+<div class="tc" id="tc-forwards">
+  <div class="cg c2">
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--neon)"></span>Implied ZARONIA Forward Rates (3M×3M, NACC%)</div>
+      <div class="cw" style="height:200px"><canvas id="c-ois-fwds"></canvas></div>
+    </div>
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--blue)"></span>Implied JIBAR Forward Rates (3M×3M, NACC%)</div>
+      <div class="cw" style="height:200px"><canvas id="c-jib-fwds"></canvas></div>
+    </div>
+  </div>
+  <div class="cg c2">
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--purple)"></span>Implied SARB Repo Path (NACM→NACC, %)</div>
+      <div class="cw" style="height:200px"><canvas id="c-repo-fwd"></canvas></div>
+    </div>
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--amber)"></span>OIS vs JIBAR vs Repo Forward Comparison</div>
+      <div class="cw" style="height:200px"><canvas id="c-fwd-compare"></canvas></div>
+    </div>
+  </div>
+  <div>
+    <div class="sh"><span class="sa pu"></span>Implied Forward Rate Table — OIS, JIBAR, Repo</div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th>Period</th><th>Start(y)</th><th>End(y)</th>
+        <th>OIS Fwd NACC%</th><th>OIS Comp Rate%</th>
+        <th>JIBAR Fwd NACC%</th><th>JIBAR Comp Rate%</th>
+        <th>Repo Implied%</th><th>OIS-Repo Spread (bp)</th><th>JIBAR-OIS Spread (bp)</th>
+      </tr></thead>
+      <tbody id="tb-fwds"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ── REPO / SARB ── -->
+<div class="tc" id="tc-repo">
+  <div>
+    <div class="sh"><span class="sa rp"></span>SARB Repo Analysis — Rate Convention Mathematics</div>
+    <div class="kg c4" id="repo-kpi"></div>
+  </div>
+
+  <!-- MATH ANNOTATIONS -->
+  <div class="math-grid">
+    <div class="math-box">
+      <h4>📐 Compounding Convention Theory</h4>
+      All nominal rate conventions are equivalent representations of the same <strong>effective annual rate (EAR)</strong>.
+      The no-arbitrage identity (Hull, 2022; Brigo &amp; Mercurio, 2006):
+      <span class="fm">(1 + r_m/m)^m  =  (1 + r_q/4)^4  =  (1 + r_a)  =  e^(r_c)</span>
+      where <strong>m = compounding frequency</strong>. SARB quotes repo as <strong>NACM (m=12)</strong> — monthly.
+      Conversions are exact — no approximation.
+      <span class="ref">Ref: SARB Monetary Policy Framework; ISDA 2006 Definitions §6.2</span>
+    </div>
+    <div class="math-box">
+      <h4>🔄 NACM → Other Conventions</h4>
+      Given repo rate <strong>r_m</strong> (NACM, as quoted by SARB):
+      <span class="fm">NACC:  r_c = 12 · ln(1 + r_m/12)</span>
+      <span class="fm">NACQ:  r_q = 4 · (e^(r_c/4) − 1)</span>
+      <span class="fm">Eff Ann:  r_a = (1 + r_m/12)^12 − 1</span>
+      <strong>Key insight:</strong> NACM &lt; NACQ &lt; NACC &lt; Eff Annual for positive rates — higher compounding frequency requires a lower nominal rate to achieve the same effective return.
+      <span class="ref">Ref: Fabozzi (2012), Fixed Income Mathematics §2; QuantLib ActualActual</span>
+    </div>
+  </div>
+  <div class="math-grid">
+    <div class="math-box">
+      <h4>📊 Spread to Swap Rates (basis points)</h4>
+      Spread is computed on <strong>comparable conventions (NACQ)</strong>, since swap fixed rates are NACQ:
+      <span class="fm">Spread (bp) = (r_swap_NACQ − r_repo_NACQ) × 100</span>
+      A positive spread means swap rates exceed the repo rate — the market prices <strong>credit/liquidity/term premium</strong> over the policy rate. The OIS rate should trade above repo by the <strong>OIS-repo spread</strong> (historically ~15–25bp in ZAR), reflecting the difference between overnight compounding and the monthly repo fixing.
+      <span class="ref">Ref: SARB Working Paper WP/23/01; Duffie &amp; Stein (2015)</span>
+    </div>
+    <div class="math-box">
+      <h4>🏦 QuantLib Implementation</h4>
+      In QuantLib, the SARB repo maps to:
+      <span class="fm">ql.SimpleQuote(repoNACM)</span>
+      <span class="fm">ql.FlatForward(today, repoHandle, ql.Actual365Fixed(), ql.Monthly)</span>
+      The <strong>OvernightIndex</strong> (ZARONIA) uses:
+      <span class="fm">ql.OvernightIndex("ZARONIA", 0, ql.ZARCurrency(), cal, ql.Actual365Fixed())</span>
+      OIS swap pricing via <strong>MakeOIS</strong>:
+      <span class="fm">ql.MakeOIS(tenor, oisIndex, fixedRate, ql.Period("0D"))</span>
+      <span class="ref">Ref: QuantLib docs §InterestRateSwap; Ametrano &amp; Bianchetti (2013)</span>
+    </div>
+  </div>
+
+  <div class="cg c2">
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--purple)"></span>Repo Rate Conversions — All Conventions (%)</div>
+      <div class="cw" style="height:190px"><canvas id="c-repo-conv"></canvas></div>
+    </div>
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--lime)"></span>Spread of OIS &amp; JIBAR over Repo NACQ across Term (bp)</div>
+      <div class="cw" style="height:190px"><canvas id="c-repo-spread"></canvas></div>
+    </div>
+  </div>
+  <div>
+    <div class="sh"><span class="sa rp"></span>Repo Rate Convention Table — All Spreads in Basis Points</div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th>Convention</th><th>Rate%</th><th>Eff Annual%</th><th>Spread to OIS 1Y (bp)</th><th>Spread to JIBAR 3M (bp)</th><th>Mathematical Definition &amp; Notes</th>
+      </tr></thead>
+      <tbody id="tb-repo"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ── SCENARIO ── -->
+<div class="tc" id="tc-scenario">
+  <div>
+    <div class="sh"><span class="sa re"></span>NPV Heatmap — OIS Swap · Curve Shift (rows) × Fixed Rate (cols) · ZAR m</div>
+    <div id="heatmap" style="overflow-x:auto;margin-bottom:10px"></div>
+  </div>
+  <div class="cg c2">
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--purple)"></span>NPV Sensitivity — OIS Swap (ZAR m)</div>
+      <div class="cw" style="height:190px"><canvas id="c-scen-ois"></canvas></div>
+    </div>
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--blue)"></span>OIS Fair Rate Sensitivity to Curve Shifts</div>
+      <div class="cw" style="height:190px"><canvas id="c-scen-fair"></canvas></div>
+    </div>
+  </div>
+  <div>
+    <div class="sh"><span class="sa re"></span>Scenario Strip</div>
+    <div class="stg" id="scen-tiles"></div>
+  </div>
+</div>
+<!-- ── FRN PRICER ── -->
+<div class="tc" id="tc-frn">
+
+  <!-- ── HEADER MATH NOTE ── -->
+  <div class="math-box" style="border-left-color:var(--lime)">
+    <h4 style="color:var(--lime)">📋 JIBAR FRN Pricing — QuantLib FloatingRateBond Methodology</h4>
+    A JIBAR-linked FRN pays <strong>quarterly coupons = (JIBAR₃M_reset + spread) × N × DCF</strong>.
+    The current coupon is <em>locked in</em> at the last reset date's JIBAR fixing; future coupons are <em>projected</em> using the JIBAR forward curve.
+    <span class="fm">Dirty Price = Σᵢ [ CF_i × DF_jibar(tᵢ) × e^(−dm × τᵢ) ] + N × DF_jibar(T) × e^(−dm × T)</span>
+    where <strong>dm</strong> = discount margin above JIBAR curve, <strong>τᵢ</strong> = ACT/365 tenor to payment date.
+    <span class="fm">Accrued Interest = (days_since_reset / days_in_period) × coupon_rate × N</span>
+    <span class="fm">Clean Price = Dirty Price − Accrued Interest</span>
+    The <strong>ZARONIA equivalent note</strong> replaces remaining JIBAR-projected coupons with ZARONIA overnight-compounded coupons,
+    using <span class="fm">ZARONIA_spread = issue_spread + OIS/JIBAR_basis</span> and OIS discount factors from the ZARONIA curve.
+    <span class="ref">Ref: QuantLib FloatingRateBond; Fabozzi (2012) §FRN Valuation; ISDA 2006 §6.2 Reset Convention</span>
+  </div>
+
+  <!-- ── FRN INPUTS (self-contained within tab) ── -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:4px">
+
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-left:3px solid var(--lime);padding:10px 12px;border-radius:1px">
+      <div class="sh" style="border-bottom-color:var(--lime)"><span class="sa lm"></span>Bond Terms</div>
+      <div class="ir"><span class="il">Face Value (ZAR)</span>
+        <input class="if" id="frn-face" type="number" step="1000000" value="100000000" style="color:var(--lime)"><span class="iu"></span></div>
+      <div class="ir"><span class="il">Issue Date</span>
+        <input class="if" id="frn-issue" type="date" value="2022-09-15" style="color:var(--lime)"></span><span class="iu"></span></div>
+      <div class="ir"><span class="il">Maturity Date</span>
+        <input class="if" id="frn-maturity" type="date" value="2027-09-15" style="color:var(--lime)"></span><span class="iu"></span></div>
+      <div class="ir"><span class="il">Issue Spread</span>
+        <input class="if" id="frn-ispread" type="number" step="0.5" value="85" style="color:var(--lime)"><span class="iu">bp</span></div>
+      <div class="ir"><span class="il">Day Count</span>
+        <select class="if" id="frn-dc" style="color:var(--lime)">
+          <option value="act365" selected>ACT/365F</option>
+          <option value="act360">ACT/360</option>
+        </select><span class="iu"></span></div>
+    </div>
+
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-left:3px solid var(--amber);padding:10px 12px;border-radius:1px">
+      <div class="sh" style="border-bottom-color:var(--amber)"><span class="sa am"></span>Trading / Settlement</div>
+      <div class="ir"><span class="il">Settle Date</span>
+        <input class="if" id="frn-settle" type="date" style="color:var(--amber)"></span><span class="iu"></span></div>
+      <div class="ir"><span class="il">Trading Spread</span>
+        <input class="if" id="frn-tspread" type="number" step="0.5" value="72" style="color:var(--amber)"><span class="iu">bp</span></div>
+      <div class="ir"><span class="il">Last Reset JIBAR</span>
+        <input class="if" id="frn-lastjibar" type="number" step="0.01" value="6.76" style="color:var(--blue)"><span class="iu">%</span></div>
+      <div class="ir"><span class="il">Last Reset Date</span>
+        <input class="if" id="frn-lastreset" type="date" style="color:var(--blue)"></span><span class="iu"></span></div>
+      <div class="ir"><span class="il">Next Reset Date</span>
+        <input class="if" id="frn-nextreset" type="date" style="color:var(--blue)"></span><span class="iu"></span></div>
+    </div>
+
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-left:3px solid var(--neon);padding:10px 12px;border-radius:1px">
+      <div class="sh" style="border-bottom-color:var(--neon)"><span class="sa"></span>ZARONIA Conversion</div>
+      <div class="ir"><span class="il">Conversion Date</span>
+        <input class="if" id="frn-convdate" type="date" style="color:var(--neon)"></span><span class="iu"></span></div>
+      <div class="ir"><span class="il">OIS/JIBAR Basis</span>
+        <input class="if" id="frn-basis" type="number" step="0.5" value="-15" style="color:var(--red)"><span class="iu">bp</span></div>
+      <div style="font-size:8.5px;color:var(--t2);line-height:1.7;margin-top:6px">
+        ZARONIA spread = Issue spread + Basis.<br>
+        Remaining cashflows re-projected on OIS curve.<br>
+        Equivalent note shows OIS-discounted dirty/clean price.
+      </div>
+      <button onclick="priceFRN()" style="margin-top:10px;width:100%;background:transparent;border:1px solid var(--lime);color:var(--lime);font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;padding:7px;cursor:pointer;border-radius:1px;text-transform:uppercase">⟳ PRICE FRN</button>
+    </div>
+
+  </div>
+
+  <!-- ── JIBAR FRN KPIs ── -->
+  <div>
+    <div class="sh"><span class="sa lm"></span>JIBAR FRN — Valuation at Settle Date</div>
+    <div class="kg" id="frn-jibar-kpi" style="grid-template-columns:repeat(6,1fr);gap:6px"></div>
+  </div>
+
+  <!-- ── ZARONIA EQUIVALENT KPIs ── -->
+  <div>
+    <div class="sh"><span class="sa"></span>ZARONIA Equivalent Note — Valuation from Conversion Date</div>
+    <div class="kg" id="frn-ois-kpi" style="grid-template-columns:repeat(6,1fr);gap:6px"></div>
+  </div>
+
+  <!-- ── CHARTS ── -->
+  <div class="cg c2">
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--lime)"></span>JIBAR FRN — Projected Coupon Strip (%)</div>
+      <div class="cw" style="height:190px"><canvas id="c-frn-coupons"></canvas></div>
+    </div>
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--neon)"></span>ZARONIA Equiv — Coupon Comparison (bp spread)</div>
+      <div class="cw" style="height:190px"><canvas id="c-frn-basis-comp"></canvas></div>
+    </div>
+  </div>
+  <div class="cg c2">
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--amber)"></span>Cashflow PV Profile — JIBAR vs ZARONIA Equiv (ZAR)</div>
+      <div class="cw" style="height:180px"><canvas id="c-frn-pvprofile"></canvas></div>
+    </div>
+    <div class="cb">
+      <div class="ct"><span class="cd" style="background:var(--red)"></span>Clean Price vs Trading Spread Sensitivity</div>
+      <div class="cw" style="height:180px"><canvas id="c-frn-spread-sens"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ── RESET SCHEDULE TABLE ── -->
+  <div>
+    <div class="sh"><span class="sa lm"></span>Full Reset Schedule — JIBAR FRN &amp; ZARONIA Equivalent</div>
+    <div class="tw" style="font-size:9px"><table>
+      <thead><tr>
+        <th>Prd</th><th>Reset Date</th><th>Start Date</th><th>Pay Date</th><th>DCF</th>
+        <th>JIBAR Reset%</th><th>Cpn Rate%</th><th>JIBAR CF (ZAR)</th><th>JIBAR DF</th><th>JIBAR PV</th>
+        <th>OIS Equiv%</th><th>OIS CF (ZAR)</th><th>OIS DF</th><th>OIS PV</th>
+        <th>Status</th>
+      </tr></thead>
+      <tbody id="tb-frn"></tbody>
+    </table></div>
+  </div>
+
+</div><!-- /tc-frn -->
+
+</div><!-- /main -->
+</div><!-- /lay -->
+
+<!-- STATUS BAR -->
+<div class="sbar">
+  <span class="sbi">OIS 1Y <span id="sb-ois1">—</span></span>
+  <span class="sbi">OIS 5Y <span id="sb-ois5">—</span></span>
+  <span class="sbi">JIBAR 1Y <span id="sb-jib1">—</span></span>
+  <span class="sbi">BASIS 1Y <span id="sb-bas1">—</span>bp</span>
+  <span class="sbi">SWAP NPV <span id="sb-npv">—</span></span>
+  <span class="sbi">PV01 <span id="sb-pv01">—</span></span>
+  <span style="margin-left:auto;font-size:8px;color:var(--t3)">ZAR RATES DESK · ZARONIA OIS · JIBAR VANILLA · NACQ FIXED · ACT/365F</span>
+</div>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const fmt=(n,d=2)=>(isNaN(n)||n==null)?'—':n.toLocaleString('en-ZA',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtM=n=>(n/1e6).toFixed(3);
+const fp=(n,d=4)=>isNaN(n)?'—':n.toFixed(d)+'%';
+const fbp=(n,d=1)=>isNaN(n)?'—':n.toFixed(d)+'bp';
+const fmt8=d=>d instanceof Date?d.toISOString().slice(0,10):'';
+const dateStr=d=>d.toISOString().slice(0,10);
+function addMonths(d,m){const r=new Date(d);r.setMonth(r.getMonth()+m);return r}
+function dcf365(d1,d2){return(d2-d1)/(86400000*365)}
+
+// Clock
+const clk=()=>{const n=new Date();$('clk').textContent=n.toLocaleTimeString('en-ZA',{hour12:false})+' SAST'};
+setInterval(clk,1000);clk();
+
+// Tab switch
+function sw(name,el){
+  document.querySelectorAll('.tc').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  $('tc-'+name).classList.add('on');
+  el.classList.add('on');
+  setTimeout(()=>compute(false),50); // re-draw charts for newly visible tab
+}
+
+// ════════════════════════════════════════
+// CHART ENGINE
+// ════════════════════════════════════════
+const CH={};
+const FONT='JetBrains Mono';
+function mkChart(id,type,labels,datasets,extra={}){
+  if(CH[id]){CH[id].destroy();delete CH[id]}
+  const el=$(id); if(!el||!el.parentElement)return;
+  const wrap=el.parentElement;
+  el.width=wrap.clientWidth||400; el.height=wrap.clientHeight||180;
+  const vals=datasets.flatMap(d=>(d.data||[]).filter(v=>v!=null&&isFinite(v)));
+  if(!vals.length)return;
+  const lo=Math.min(...vals),hi=Math.max(...vals);
+  const span=hi-lo||0.1;
+  const pad=span*0.12;
+  const yMin=(extra.yMin!==undefined?extra.yMin:lo-pad);
+  const yMax=(extra.yMax!==undefined?extra.yMax:hi+pad);
+  const T={color:'#6868a0',font:{family:FONT,size:8}};
+  const G={color:'rgba(24,24,52,.9)'};
+  CH[id]=new Chart(el,{type,
+    data:{labels,datasets},
+    options:{responsive:false,animation:{duration:220,easing:'easeOutQuart'},
+      plugins:{
+        legend:{labels:{color:'#3f3f60',font:{family:FONT,size:8},boxWidth:8,padding:8}},
+        tooltip:{backgroundColor:'#07070f',borderColor:'#1c1c2e',borderWidth:1,
+          titleColor:'#00ffcc',bodyColor:'#ddddf5',padding:7,
+          titleFont:{family:FONT,size:8},bodyFont:{family:FONT,size:8}}
+      },
+      scales:{
+        x:{ticks:T,grid:G,border:{color:'#161626'}},
+        y:{ticks:T,grid:G,border:{color:'#161626'},min:yMin,max:yMax,
+          ...(extra.yTitle?{title:{display:true,text:extra.yTitle,color:'#3f3f60',font:{family:FONT,size:8}}}:{})}
+      },...(extra.opts||{})
+    }
+  });
+}
+
+// ════════════════════════════════════════
+// RATE CONVERSIONS
+// ════════════════════════════════════════
+// NACM → effective annual: (1+r/12)^12 - 1
+// NACQ → effective annual: (1+r/4)^4 - 1
+// NACC → exp(r)-1
+// NACM→NACC: ln((1+r/12)^12) = 12*ln(1+r/12)
+function nacmToNACC(r){return 12*Math.log(1+r/12)}
+function nacqToNACC(r){return 4*Math.log(1+r/4)}
+function naccToNACQ(r){return 4*(Math.exp(r/4)-1)}
+function nacqEff(r){return Math.pow(1+r/4,4)-1}
+function nacmEff(r){return Math.pow(1+r/12,12)-1}
+
+// ════════════════════════════════════════
+// BOOTSTRAP — OIS CURVE (20 quarterly pillars, 5Y)
+// Using JIBAR for Y1 short end + OIS par swaps for Y2-5
+// ════════════════════════════════════════
+function bootstrapOIS(mkt){
+  // mkt rates are DECIMAL (e.g. 0.0676)
+  const {zaronia,jibar3m,fra_36,fra_69,fra_912,ois_1,ois_2,ois_3,ois_4,ois_5}=mkt;
+  const N=20;
+  const today=new Date();today.setHours(0,0,0,0);
+  const dates=[today];
+  for(let i=1;i<=N;i++) dates.push(addMonths(today,i*3));
+  const tau=dates.map(d=>dcf365(today,d));
+  const dt=[];for(let i=1;i<=N;i++) dt.push(dcf365(dates[i-1],dates[i]));
+
+  const DF=new Array(N+1).fill(0);
+  DF[0]=1;
+
+  // ── Y1: deposit + FRA strip (no unknowns, sequential exact) ──
+  DF[1]=1/(1+jibar3m*dt[0]);
+  DF[2]=DF[1]/(1+fra_36*dt[1]);
+  DF[3]=DF[2]/(1+fra_69*dt[2]);
+  DF[4]=DF[3]/(1+fra_912*dt[3]);
+
+  // ── Y2-Y5: par NACQ swap bootstrap ──
+  // Correct algorithm (QuantLib PiecewiseYieldCurve style):
+  //   1. For each annual pillar Q = yr×4, the par condition is:
+  //      r/4 × Σ_{i=1}^{Q} DF[i]  =  1 − DF[Q]
+  //   2. Intermediates (non-pillar quarters) are filled by log-linear
+  //      interpolation BEFORE the annuity sum for the NEXT pillar.
+  //   3. We solve for DF[Q] given all prior DFs are already populated.
+  //      Since intermediates depend on DF[Q] (log-linear between prev pillar and Q),
+  //      we use Newton-Raphson: unknowns in annuity are the intermediate quarters
+  //      which are linear-in-log in DF[Q]. This gives a one-variable root-find.
+  //
+  //   Objective: f(d) = r/4 × [ann_known + Σ interp(d)] + d − 1 = 0
+  //   where interp(d)_k = exp(log(DF[prevQ])*(1-fk) + log(d)*fk), fk = k/4
+
+  const parOIS=[ois_1,ois_2,ois_3,ois_4,ois_5]; // decimal
+
+  for(let yr=2;yr<=5;yr++){
+    const r4 = parOIS[yr-1]/4;  // quarterly decimal coupon
+    const Q  = yr*4;
+    const prevQ = (yr-1)*4;
+    const logPrevDF = Math.log(DF[prevQ]);
+
+    // Sum of all known DFs before the new pillar's intermediate zone
+    let annKnown = 0;
+    for(let j=1; j<=prevQ; j++) annKnown += DF[j];
+
+    // f(d) = r4 * [annKnown + Σ_{k=1}^{3} exp(logPrevDF*(1-k/4) + log(d)*k/4)] + d - 1
+    // Newton-Raphson solve for d = DF[Q]
+    // Initial guess: continuous compounding at par rate
+    let d = Math.exp(-parOIS[yr-1] * tau[Q]);
+    if(d<=0||d>=1) d = DF[prevQ]*0.97;
+
+    for(let iter=0; iter<50; iter++){
+      if(d<=0) d=1e-6;
+      const logD = Math.log(d);
+      let annInterp=0, dAnnInterp=0;
+      for(let k=1; k<=3; k++){
+        const fk = k/4;
+        const vi = Math.exp(logPrevDF*(1-fk) + logD*fk);
+        annInterp  += vi;
+        dAnnInterp += vi * fk / d;
+      }
+      // Par condition: r4*(annKnown + annInterp + d) + d - 1 = 0
+      // annuity includes DF[Q] itself (d) as last coupon period
+      const f  = r4*(annKnown + annInterp + d) + d - 1;
+      const fp = r4*(dAnnInterp + 1) + 1;
+      const step = f/fp;
+      d -= step;
+      if(Math.abs(step) < 1e-14) break;
+    }
+
+    // Clamp: DF must be positive and less than previous pillar
+    if(!isFinite(d)||d<=0) d = Math.exp(-parOIS[yr-1]*tau[Q]);
+    d = Math.min(d, DF[prevQ]*0.9999);
+    DF[Q] = d;
+
+    // Fill intermediates by log-linear interpolation
+    const logD = Math.log(d);
+    for(let k=1; k<=3; k++){
+      const fk = k/4;
+      DF[prevQ+k] = Math.exp(logPrevDF*(1-fk) + logD*fk);
+    }
+  }
+
+  const zero=[null],fwd=[null];
+  for(let i=1;i<=N;i++){
+    zero.push(tau[i]>0 ? -Math.log(DF[i])/tau[i] : 0);
+    const dTau=tau[i]-tau[i-1];
+    fwd.push(dTau>0 ? (Math.log(DF[i-1])-Math.log(DF[i]))/dTau : 0);
+  }
+  return{DF,zero,fwd,dates,tau,dt,N};
+}
+
+// ════════════════════════════════════════
+// BOOTSTRAP — JIBAR CURVE
+// Instruments: JIBAR 3M deposit, FRA strip, then SASW par rates
+// JIBAR swap: fixed NACQ vs JIBAR 3M floating quarterly
+// Exact same Newton-Raphson approach as OIS bootstrap
+// ════════════════════════════════════════
+function bootstrapJIBAR(mkt){
+  // mkt rates are DECIMAL (e.g. 0.0676)
+  const {jibar3m,fra_36,fra_69,fra_912,sw_j1,sw_j2,sw_j3,sw_j5,sw_j10}=mkt;
+  const N=40; // 10Y quarterly
+  const today=new Date();today.setHours(0,0,0,0);
+  const dates=[today];
+  for(let i=1;i<=N;i++) dates.push(addMonths(today,i*3));
+  const tau=dates.map(d=>dcf365(today,d));
+  const dt=[];for(let i=1;i<=N;i++) dt.push(dcf365(dates[i-1],dates[i]));
+
+  const DF=new Array(N+1).fill(0);
+  DF[0]=1;
+
+  // ── Y1: deposit + FRA strip (sequential, exact) ──
+  DF[1]=1/(1+jibar3m*dt[0]);
+  DF[2]=DF[1]/(1+fra_36*dt[1]);
+  DF[3]=DF[2]/(1+fra_69*dt[2]);
+  DF[4]=DF[3]/(1+fra_912*dt[3]);
+
+  // ── Annual pillars: SASW1(Q4 done), SASW2(Q8), SASW3(Q12), SASW5(Q20), SASW10(Q40) ──
+  // For each pillar at Q with par rate rPar:
+  //   Par condition: rPar/4 × Σ_{i=1}^{Q} DF[i] = 1 − DF[Q]
+  //   Intermediates between prevQ and Q are log-linear in DF[Q].
+  //   Newton-Raphson on the single unknown d = DF[Q].
+  const jPillars=[[4,sw_j1],[8,sw_j2],[12,sw_j3],[20,sw_j5],[40,sw_j10]];
+  let prevQ=0;
+
+  for(const[Q,rPar] of jPillars){
+    if(!rPar||rPar<=0){ prevQ=Q; continue; }
+    const r4 = rPar/4;
+
+    if(Q===4){
+      // Already bootstrapped from FRA strip — verify par consistency, keep as-is
+      prevQ=4; continue;
+    }
+
+    const logPrevDF = Math.log(DF[prevQ]);
+    const nInterp   = Q - prevQ - 1; // number of intermediate quarters
+
+    // Sum of all DFs fully known (before the intermediate zone)
+    let annKnown = 0;
+    for(let j=1; j<=prevQ; j++) annKnown += DF[j];
+
+    // f(d)  = r4*[annKnown + Σ_{k=1}^{nInterp} exp(a + b_k*log(d))] + d − 1
+    //          where a = logPrevDF*(1-k/(nInterp+1)), b_k = k/(nInterp+1)
+    // f'(d) = r4*Σ b_k/d * exp(a + b_k*log(d)) + 1
+
+    let d = Math.exp(-rPar * tau[Q]);
+    if(d<=0||d>=DF[prevQ]) d = DF[prevQ] * Math.exp(-rPar*(tau[Q]-tau[prevQ]));
+
+    for(let iter=0; iter<60; iter++){
+      if(d<=0) d=1e-8;
+      const logD = Math.log(d);
+      let annInterp=0, dAnnInterp=0;
+      for(let k=1; k<=nInterp; k++){
+        const fk = k/(nInterp+1);
+        const vi = Math.exp(logPrevDF*(1-fk) + logD*fk);
+        annInterp  += vi;
+        dAnnInterp += vi*fk/d;
+      }
+      // Par condition includes DF[Q] (d) in annuity
+      const f  = r4*(annKnown + annInterp + d) + d - 1;
+      const fp = r4*(dAnnInterp + 1) + 1;
+      const step = f/fp;
+      d -= step;
+      if(Math.abs(step)<1e-14) break;
+    }
+
+    if(!isFinite(d)||d<=0) d = Math.exp(-rPar*tau[Q]);
+    d = Math.min(d, DF[prevQ]*0.9999);
+    DF[Q] = d;
+
+    // Fill intermediates by log-linear interpolation
+    const logD = Math.log(d);
+    for(let k=1; k<=nInterp; k++){
+      const fk = k/(nInterp+1);
+      DF[prevQ+k] = Math.exp(logPrevDF*(1-fk) + logD*fk);
+    }
+    prevQ = Q;
+  }
+
+  // Extrapolate Q21-Q39 (between SASW5 and SASW10 already filled above)
+  // Q40 is SASW10 pillar, Q21-Q39 are intermediates (nInterp=19 handled above)
+  // Fill any remaining zeros
+  for(let i=1;i<=N;i++){
+    if(!DF[i]||DF[i]<=0||!isFinite(DF[i]))
+      DF[i]=DF[i-1]*Math.exp(-sw_j10*dcf365(dates[i-1],dates[i]));
+  }
+
+  const zero=[null],fwd=[null];
+  for(let i=1;i<=N;i++){
+    zero.push(tau[i]>0 ? -Math.log(DF[i])/tau[i] : 0);
+    const dTau=tau[i]-tau[i-1];
+    fwd.push(dTau>0 ? (Math.log(DF[i-1])-Math.log(DF[i]))/dTau : 0);
+  }
+  return{DF,zero,fwd,dates,tau,dt,N};
+}
+
+// ════════════════════════════════════════
+// FAIR RATE — OIS strip (6M,1Y,18M,2Y,3Y,4Y,5Y)
+// ════════════════════════════════════════
+function fairOIS(oisCurve,notional){
+  const{DF,zero,fwd,tau,dt,N}=oisCurve;
+  const tenors=[{label:'6M',qtrs:2},{label:'1Y',qtrs:4},{label:'18M',qtrs:6},
+    {label:'2Y',qtrs:8},{label:'3Y',qtrs:12},{label:'4Y',qtrs:16},{label:'5Y',qtrs:20}];
+  return tenors.map(({label,qtrs})=>{
+    const n=Math.min(qtrs,N);
+    // PV float (OIS compounded) = N*(1-DF[n]) telescoping
+    const pvFlt=notional*(1-DF[n]);
+    let ann=0;for(let i=1;i<=n;i++) ann+=DF[i];
+    const fairQtr=pvFlt/(notional*ann);
+    const fairNACQ=fairQtr*4*100;
+    const fairEff=(Math.pow(1+fairQtr,4)-1)*100;
+    const df=DF[n];
+    // PV01 approx
+    const pv01=-ann*notional/10000;
+    return{label,qtrs:n,fairNACQ,fairEff,df,ann,pvFlt,pv01:Math.abs(pv01)};
+  });
+}
+
+// ════════════════════════════════════════
+// FAIR RATE — JIBAR strip (1Y,2Y,3Y,5Y,10Y)
+// For a JIBAR swap: fixed NACQ vs JIBAR 3M quarterly
+// Fair rate: same annuity formula (par swap rate), BUT
+// JIBAR float PV = N*(1-DF_jibar[n]) only if we assume JIBAR floats at libor flat
+// ════════════════════════════════════════
+function fairJIBAR(jibCurve,tenorsQtrs){
+  const{DF,zero,fwd,tau,dt,N}=jibCurve;
+  return tenorsQtrs.map(({label,qtrs})=>{
+    const n=Math.min(qtrs,N);
+    const pvFlt=1*(1-DF[n]); // per unit notional
+    let ann=0;for(let i=1;i<=n;i++) ann+=DF[i];
+    const fairQtr=pvFlt/ann;
+    const fairNACQ=fairQtr*4*100;
+    const df=DF[n];
+    const pv01=ann/10000;
+    return{label,qtrs:n,fairNACQ,df,ann,pv01};
+  });
+}
+
+// ════════════════════════════════════════
+// PRICE SINGLE OIS SWAP
+// ════════════════════════════════════════
+function priceOIS(oisCurve,notional,fixedNACQ_pct,dir,tenorY){
+  // fixedNACQ_pct is in percent (e.g. 7.25), DF curve is in decimal
+  const{DF,zero,fwd,tau,dt}=oisCurve;
+  const nQtrs=Math.round(tenorY*4);
+  const fixedQtr=fixedNACQ_pct/4/100;  // decimal quarterly rate
+  const floatCFs=[],fixedCFs=[];
+  let pvFloat=0,pvFixed=0,ann=0;
+  for(let i=1;i<=nQtrs;i++){
+    const compFactor=DF[i-1]/DF[i];
+    const fcf=notional*(compFactor-1);
+    const fpv=fcf*DF[i];
+    pvFloat+=fpv;
+    floatCFs.push({i,compFactor,cf:fcf,pv:fpv,df:DF[i],fwd:fwd[i]||0});
+    const xcf=notional*fixedQtr;
+    const xpv=xcf*DF[i];
+    pvFixed+=xpv; ann+=DF[i];
+    fixedCFs.push({i,cf:xcf,pv:xpv,df:DF[i]});
+  }
+  const npv=dir*(pvFloat-pvFixed);
+  const fairQtr=pvFloat/(notional*ann);
+  const fairNACQ=fairQtr*4*100;  // back to percent for display
+  return{pvFloat,pvFixed,npv,ann,fairNACQ,nQtrs,floatCFs,fixedCFs};
+}
+
+// ════════════════════════════════════════
+// DEBOUNCE + AUTO REPRICE
+// ════════════════════════════════════════
+let _timer=null;
+function schedule(){
+  $('dot').classList.add('busy');
+  clearTimeout(_timer);
+  _timer=setTimeout(()=>compute(true),90);
+}
+document.querySelectorAll('.if').forEach(el=>{
+  el.addEventListener('input',()=>{
+    el.classList.add('changed');
+    setTimeout(()=>el.classList.remove('changed'),700);
+    // FRN-specific inputs reprice FRN; all others reprice curves
+    const frnIds=['frn-face','frn-issue','frn-maturity','frn-ispread','frn-settle',
+      'frn-tspread','frn-lastjibar','frn-lastreset','frn-nextreset','frn-convdate','frn-basis','frn-dc'];
+    if(frnIds.includes(el.id)) { clearTimeout(_timer); _timer=setTimeout(priceFRN,120); }
+    else schedule();
+  });
+});
+
+// ════════════════════════════════════════
+// MAIN COMPUTE
+// ════════════════════════════════════════
+function compute(log=true){
+  const t0=performance.now();
+
+  // Read inputs — ALL rates stored as DECIMAL (e.g. 0.0676, not 6.76)
+  const mkt={
+    zaronia: +$('zaronia').value /100,
+    jibar3m: +$('jibar3m').value /100,
+    fra_36:  +$('fra_36').value  /100,
+    fra_69:  +$('fra_69').value  /100,
+    fra_912: +$('fra_912').value /100,
+    fra_1821:+$('fra_1821').value/100,
+    ois_1:   +$('ois_1').value   /100,
+    ois_2:   +$('ois_2').value   /100,
+    ois_3:   +$('ois_3').value   /100,
+    ois_4:   +$('ois_4').value   /100,
+    ois_5:   +$('ois_5').value   /100,
+    sw_j1:   +$('sw_j1').value   /100,
+    sw_j2:   +$('sw_j2').value   /100,
+    sw_j3:   +$('sw_j3').value   /100,
+    sw_j5:   +$('sw_j5').value   /100,
+    sw_j10:  +$('sw_j10').value  /100,
+  };
+  const repoNACM=+$('repo').value/100;
+  const notional=+$('notional').value;
+  const fixedNACQ=+$('fixedRate').value;
+  const dir=+$('direction').value;
+  const tenorY=+$('swTenor').value;
+  const basis=+$('basis').value; // bp
+
+  // Build curves
+  const oisC=bootstrapOIS(mkt);
+  const jibC=bootstrapJIBAR(mkt);
+
+  // Fair rate strips
+  const oisStrip=fairOIS(oisC,notional);
+  const jibTenors=[{label:'6M',qtrs:2},{label:'1Y',qtrs:4},{label:'18M',qtrs:6},
+    {label:'2Y',qtrs:8},{label:'3Y',qtrs:12},{label:'5Y',qtrs:20},{label:'10Y',qtrs:40}];
+  const jibStrip=fairJIBAR(jibC,jibTenors);
+
+  // Single swap
+  const sw=priceOIS(oisC,notional,fixedNACQ,dir,tenorY);
+
+  // Repo conversions
+  const repoNACC=nacmToNACC(repoNACM);
+  const repoEff=nacmEff(repoNACM);
+  const ois1NACC=oisC.zero[4]||0;
+  const jib1NACC=jibC.zero[4]||0;
+
+  // Implied forward ZARONIA from FRAs (for repo path)
+  const repoNACCimplied=[null];
+  // Approximate: short-end OIS ~ repo + ZARONIA spread (~10bp)
+  // We use the OIS forward rates as proxies for implied policy rate expectations
+  for(let i=1;i<=20;i++) repoNACCimplied.push((oisC.fwd[i]||0)*100-0.15); // -15bp ZARONIA/repo spread
+
+  // ─── STATUS BAR ───
+  const ois1=oisStrip.find(s=>s.label==='1Y');
+  const ois5=oisStrip.find(s=>s.label==='5Y');
+  const jib1=jibStrip.find(s=>s.label==='1Y');
+  $('sb-ois1').textContent=ois1?fp(ois1.fairNACQ,3):'—';
+  $('sb-ois5').textContent=ois5?fp(ois5.fairNACQ,3):'—';
+  $('sb-jib1').textContent=jib1?fp(jib1.fairNACQ,3):'—';
+  const bas1=ois1&&jib1?((ois1.fairNACQ-jib1.fairNACQ)*100):NaN; // bp = pct_diff × 100
+  $('sb-bas1').textContent=fbp(bas1,1);
+  $('sb-npv').textContent='R '+fmtM(sw.npv)+'m';
+  // PV01 approx
+  const pv01approx=-sw.ann*notional/10000;
+  $('sb-pv01').textContent='R '+fmt(Math.abs(pv01approx*dir),0);
+
+  // ─── OVERVIEW TAB ───
+  // OIS strip KPI tiles
+  let oisKpiHTML='<div class="kg" style="grid-template-columns:repeat(7,1fr);gap:5px">';
+  oisStrip.forEach(s=>{
+    oisKpiHTML+=`<div class="kc n">
+      <div class="kl">OIS ${s.label}</div>
+      <div class="kv n">${fp(s.fairNACQ,3)}</div>
+      <div class="ks">DF=${s.df.toFixed(5)}</div>
+    </div>`;
+  });
+  oisKpiHTML+='</div>';
+  $('ois-strip-kpi').innerHTML=oisKpiHTML;
+
+  let jibKpiHTML='<div class="kg" style="grid-template-columns:repeat(7,1fr);gap:5px">';
+  jibStrip.forEach(s=>{
+    jibKpiHTML+=`<div class="kc b">
+      <div class="kl">JIBAR ${s.label}</div>
+      <div class="kv b">${fp(s.fairNACQ,3)}</div>
+      <div class="ks">DF=${s.df.toFixed(5)}</div>
+    </div>`;
+  });
+  jibKpiHTML+='</div>';
+  $('jibar-strip-kpi').innerHTML=jibKpiHTML;
+
+  // Overview charts
+  const tenorLabels=oisStrip.map(s=>s.label);
+  const oisFairRates=oisStrip.map(s=>+s.fairNACQ.toFixed(4));
+  const jibFairRates=jibStrip.slice(0,7).map(s=>+s.fairNACQ.toFixed(4));
+  const basisBP=oisStrip.map((s,i)=>+((s.fairNACQ-(jibStrip[i]?.fairNACQ||0))*100).toFixed(2));
+
+  mkChart('c-ois-strip','line',tenorLabels,
+    [{label:'OIS Fair NACQ%',data:oisFairRates,borderColor:'#00ffcc',backgroundColor:'rgba(0,255,204,.06)',
+      pointBackgroundColor:'#00ffcc',pointRadius:5,tension:.3,fill:true,borderWidth:2}]);
+  mkChart('c-jib-strip','line',jibStrip.map(s=>s.label),
+    [{label:'JIBAR Fair NACQ%',data:jibFairRates,borderColor:'#00b8ff',backgroundColor:'rgba(0,184,255,.06)',
+      pointBackgroundColor:'#00b8ff',pointRadius:5,tension:.3,fill:true,borderWidth:2}]);
+  mkChart('c-basis-overview','bar',tenorLabels,
+    [{label:'OIS/JIBAR Basis (bp)',data:basisBP,
+      backgroundColor:basisBP.map(v=>v<0?'rgba(255,51,85,.5)':'rgba(0,230,118,.5)'),
+      borderColor:basisBP.map(v=>v<0?'#ff3355':'#00e676'),borderWidth:1}]);
+
+  // Forward comparison
+  const fwdLabels=['Q1','Q2','Q3','Q4','Q6','Q8','Q12','Q16','Q20'];
+  const fwdIdx=[1,2,3,4,6,8,12,16,20];
+  const oisFwds=fwdIdx.map(i=>(oisC.fwd[i]||0)*100);
+  const jibFwds=fwdIdx.map(i=>(jibC.fwd[i]||0)*100);
+  mkChart('c-fwd-overview','line',fwdLabels,
+    [
+      {label:'OIS Fwd NACC%',data:oisFwds.map(v=>+v.toFixed(4)),borderColor:'#00ffcc',
+        pointRadius:4,tension:.3,borderWidth:2},
+      {label:'JIBAR Fwd NACC%',data:jibFwds.map(v=>+v.toFixed(4)),borderColor:'#00b8ff',
+        pointRadius:4,tension:.3,borderDash:[4,3],borderWidth:1.5}
+    ]);
+
+  // ─── OIS PRICER TAB ───
+  const nQtrs=sw.nQtrs;
+  const fairEff=(Math.pow(1+sw.fairNACQ/4/100,4)-1)*100;
+  // PV01 full bump — mkt is decimal, so 1bp = 0.0001
+  const bp1=0.0001;
+  function npvBump(s){
+    const m2={...mkt};
+    ['zaronia','jibar3m','fra_36','fra_69','fra_912','ois_1','ois_2','ois_3','ois_4','ois_5'].forEach(k=>{
+      if(m2[k]!==undefined) m2[k]+=s;
+    });
+    const c2=bootstrapOIS(m2);
+    return priceOIS(c2,notional,fixedNACQ,dir,tenorY).npv;
+  }
+  const pv01=(npvBump(bp1)-npvBump(-bp1))/2;
+  // CS01
+  function cs01Bump(s){
+    const Ds=oisC.DF.map((df,i)=>df*Math.exp(-s*oisC.tau[i]));
+    let flt=0,fix=0;
+    for(let i=1;i<=nQtrs;i++){
+      flt+=sw.floatCFs[i-1].cf*Ds[i];
+      fix+=notional*(fixedNACQ/4/100)*Ds[i];
+    }
+    return dir*(flt-fix);
+  }
+  const cs01=(cs01Bump(bp1)-cs01Bump(-bp1))/2;
+  const pvFixBump=notional*((fixedNACQ+0.01)/4/100)*sw.ann;
+  const dv01=-dir*(pvFixBump-sw.pvFixed);
+  let wD=0;for(let i=1;i<=nQtrs;i++) wD+=oisC.tau[i]*sw.fixedCFs[i-1].pv;
+  const modDur=wD/sw.pvFixed;
+
+  // KPIs
+  $('ois-kpi').innerHTML=`
+    <div class="kc n"><div class="kl">Fair NACQ</div><div class="kv lg n">${fp(sw.fairNACQ,4)}</div><div class="ks">breakeven fixed</div></div>
+    <div class="kc ${sw.npv>=0?'g':'r'}"><div class="kl">NPV (ZAR)</div><div class="kv lg ${sw.npv>=0?'g':'r'}">${'R '+fmt(sw.npv,0)}</div><div class="ks">${dir===1?'pay fixed':'rcv fixed'}</div></div>
+    <div class="kc b"><div class="kl">PV Float</div><div class="kv b">${'R '+fmt(sw.pvFloat,0)}</div><div class="ks">OIS compounded</div></div>
+    <div class="kc g"><div class="kl">PV Fixed</div><div class="kv g">${'R '+fmt(sw.pvFixed,0)}</div><div class="ks">NACQ coupons</div></div>
+    <div class="kc p"><div class="kl">Annuity ΣDF</div><div class="kv p">${sw.ann.toFixed(6)}</div><div class="ks">${tenorY}Y</div></div>`;
+  $('ois-greeks').innerHTML=`
+    <div class="kc a"><div class="kl">PV01</div><div class="kv a">${'R '+fmt(pv01,0)}</div><div class="ks">full curve/bp</div></div>
+    <div class="kc a"><div class="kl">CS01</div><div class="kv a">${'R '+fmt(cs01,0)}</div><div class="ks">disc only/bp</div></div>
+    <div class="kc p"><div class="kl">DV01 Fixed</div><div class="kv p">${'R '+fmt(dv01,0)}</div><div class="ks">fixed leg/bp</div></div>
+    <div class="kc b"><div class="kl">Mod Duration</div><div class="kv b">${modDur.toFixed(4)}y</div><div class="ks">fixed leg</div></div>
+    <div class="kc c"><div class="kl">Eff Annual</div><div class="kv c">${fp(fairEff,4)}</div><div class="ks">(1+r/4)⁴−1</div></div>`;
+
+  // OIS charts
+  const qLabels=Array.from({length:nQtrs},(_,i)=>'Q'+(i+1));
+  mkChart('c-ois-df','line',['0',...qLabels],
+    [{label:'OIS DF',data:oisC.DF.slice(0,nQtrs+1),borderColor:'#00ffcc',
+      backgroundColor:'rgba(0,255,204,.06)',pointRadius:3,tension:.4,fill:true,borderWidth:2}]);
+
+  const scenR=[-200,-100,-50,-25,0,25,50,100,200,300];
+  // Scenario NPVs — mkt decimal, so curveShift in decimal (bp/10000)
+  const scenNPV=scenR.map(bp=>{
+    const m2={...mkt};
+    ['zaronia','jibar3m','fra_36','fra_69','fra_912','ois_1','ois_2','ois_3','ois_4','ois_5'].forEach(k=>{
+      if(m2[k]!==undefined) m2[k]+=bp/10000;
+    });
+    return priceOIS(bootstrapOIS(m2),notional,fixedNACQ,dir,tenorY).npv/1e6;
+  });
+  mkChart('c-ois-npv','line',scenR.map(s=>s===0?'0':s>0?`+${s}`:String(s)),
+    [{label:'NPV ZARm',data:scenNPV,borderColor:'#c77dff',backgroundColor:'rgba(199,125,255,.06)',
+      pointBackgroundColor:scenNPV.map(v=>v>=0?'#00e676':'#ff3355'),
+      pointRadius:4,tension:.3,fill:true,borderWidth:2}]);
+
+  mkChart('c-ois-cf','bar',qLabels,
+    [
+      {label:'Fixed CF',data:sw.fixedCFs.map(c=>Math.round(c.cf)),backgroundColor:'rgba(0,230,118,.45)',borderColor:'#00e676',borderWidth:1},
+      {label:'Float CF',data:sw.floatCFs.map(c=>Math.round(c.cf)),backgroundColor:'rgba(24,255,255,.3)',borderColor:'#18ffff',borderWidth:1}
+    ]);
+
+  const cs01Attr=sw.floatCFs.map((_,i)=>{
+    const netPV=dir*(sw.floatCFs[i].pv-sw.fixedCFs[i].pv);
+    return +(-oisC.tau[i+1]*netPV/10000).toFixed(0);
+  });
+  mkChart('c-ois-risk','bar',qLabels,
+    [
+      {label:'PV01',data:cs01Attr,backgroundColor:cs01Attr.map(v=>v>=0?'rgba(255,170,48,.55)':'rgba(255,51,85,.55)'),borderColor:cs01Attr.map(v=>v>=0?'#ffa940':'#ff3355'),borderWidth:1},
+      {label:'CS01',data:cs01Attr.map(v=>+v.toFixed(0)),backgroundColor:'rgba(199,125,255,.3)',borderColor:'#c77dff',borderWidth:1}
+    ]);
+
+  // CF table
+  let cfH='';
+  for(let i=1;i<=nQtrs;i++){
+    const f=sw.floatCFs[i-1],x=sw.fixedCFs[i-1];
+    const netPV=dir*(f.pv-x.pv);
+    const cs01_i=-oisC.tau[i]*netPV/10000;
+    cfH+=`<tr>
+      <td class="cb2">Q${i}</td><td style="color:var(--blue)">FLOAT</td>
+      <td class="cd2">${oisC.dates[i-1]?dateStr(oisC.dates[i-1]):''}</td>
+      <td class="cd2">${oisC.dates[i]?dateStr(oisC.dates[i]):''}</td>
+      <td class="cd2">${(oisC.dt[i-1]||0).toFixed(5)}</td>
+      <td class="ca">${((f.fwd||0)*100).toFixed(4)}%</td>
+      <td class="cn">${f.compFactor.toFixed(6)}</td>
+      <td class="cb2">${fmt(f.cf,0)}</td>
+      <td class="cd2">${f.df.toFixed(6)}</td>
+      <td class="cb2">${fmt(f.pv,0)}</td>
+      <td class="cp" rowspan="2" style="vertical-align:middle;border-left:1px solid var(--bd)">${fmt(cs01_i,0)}</td>
+    </tr>
+    <tr style="background:rgba(0,230,118,.02)">
+      <td class="cg2">Q${i}</td><td style="color:var(--green)">FIXED</td>
+      <td class="cd2"></td><td class="cd2"></td>
+      <td class="cd2">${(oisC.dt[i-1]||0).toFixed(5)}</td>
+      <td class="ca">${(fixedNACQ/4).toFixed(4)}%</td>
+      <td class="cd2">—</td>
+      <td class="cg2">${fmt(x.cf,0)}</td>
+      <td class="cd2">${x.df.toFixed(6)}</td>
+      <td class="cg2">${fmt(x.pv,0)}</td>
+    </tr>`;
+    if(i<nQtrs) cfH+=`<tr><td colspan="11" style="padding:0;height:1px;background:var(--bd)"></td></tr>`;
+  }
+  $('tb-ois-cf').innerHTML=cfH;
+
+  // ─── JIBAR CURVE TAB ───
+  const jN=Math.min(40,jibC.N);
+  const jLabels=Array.from({length:jN},(_,i)=>'Q'+(i+1));
+  mkChart('c-jib-df','line',['0',...jLabels],
+    [{label:'JIBAR DF',data:jibC.DF.slice(0,jN+1),borderColor:'#00b8ff',
+      backgroundColor:'rgba(0,184,255,.06)',pointRadius:2,tension:.4,fill:true,borderWidth:2}]);
+  mkChart('c-jib-zero','line',jLabels,
+    [{label:'Zero NACC%',data:jibC.zero.slice(1,jN+1).map(r=>+(r*100).toFixed(4)),
+      borderColor:'#18ffff',backgroundColor:'rgba(24,255,255,.06)',
+      pointRadius:2,tension:.3,fill:true,borderWidth:2}]);
+  mkChart('c-jib-fwd','line',jLabels,
+    [{label:'Fwd NACC%',data:jibC.fwd.slice(1,jN+1).map(r=>+(r*100).toFixed(4)),
+      borderColor:'#ffaa30',backgroundColor:'rgba(255,170,48,.06)',
+      pointRadius:2,tension:.3,fill:true,borderDash:[4,3],borderWidth:1.5}]);
+
+  // JIBAR curve table (20 rows)
+  const jibInstr={1:'JIBAR 3M',2:'FRA 3×6',3:'FRA 6×9',4:'FRA 9×12',
+    8:'SASW2',12:'SASW3',20:'SASW5',40:'SASW10'};
+  let jibTH='';
+  for(let i=0;i<=20;i++){
+    const instr=i===0?'Spot':(jibInstr[i]||'(interp)');
+    const isInterp=i>0&&!jibInstr[i];
+    jibTH+=`<tr${isInterp?' style="opacity:.55"':''}>
+      <td class="cn">${i===0?'Today':'Q'+i}</td>
+      <td class="cd2">${(jibC.tau[i]||0).toFixed(4)}</td>
+      <td>${instr}</td>
+      <td class="ca">${i===0?'—':fp((jibC.zero[i]||0)*100,4)}</td>
+      <td class="ca">${i===0?'—':fp((jibC.fwd[i]||0)*100,4)}</td>
+      <td class="cb2">${i===0?'—':fp((jibC.zero[i]||0)*100,4)}</td>
+      <td class="cg2">${(jibC.DF[i]||1).toFixed(8)}</td>
+      <td class="cn">${i===0?'—':fp(jibStrip.find(s=>s.qtrs===i)?.fairNACQ,4)}</td>
+    </tr>`;
+  }
+  $('tb-jib-curve').innerHTML=jibTH;
+
+  // ─── BASIS TAB ───
+  const basisTenors=[{label:'6M',oIdx:0,jIdx:0},{label:'1Y',oIdx:1,jIdx:1},
+    {label:'18M',oIdx:2,jIdx:2},{label:'2Y',oIdx:3,jIdx:3},
+    {label:'3Y',oIdx:4,jIdx:4},{label:'5Y',oIdx:5,jIdx:5}];
+
+  let basisHTML='<div class="stg" style="grid-template-columns:repeat(6,1fr)">';
+  basisTenors.forEach(({label,oIdx,jIdx})=>{
+    const ois_r=oisStrip[oIdx];
+    const jib_r=jibStrip[jIdx];
+    if(!ois_r||!jib_r){basisHTML+=`<div class="st"><div class="stl">${label}</div><div class="stv">—</div></div>`;return;}
+    const bpSpread=(ois_r.fairNACQ-jib_r.fairNACQ)*100;
+    const c=bpSpread<0?'var(--red)':'var(--green)';
+    basisHTML+=`<div class="st${label==='1Y'?' hi':''}">
+      <div class="stl">BASIS ${label}</div>
+      <div class="stv" style="color:${c}">${bpSpread.toFixed(1)}bp</div>
+      <div class="sts">OIS ${fp(ois_r.fairNACQ,3)} | JIB ${fp(jib_r.fairNACQ,3)}</div>
+    </div>`;
+  });
+  basisHTML+='</div>';
+  $('basis-strip').innerHTML=basisHTML;
+
+  const basisLabels=basisTenors.map(t=>t.label);
+  const oisR=basisTenors.map(t=>oisStrip[t.oIdx]?.fairNACQ||0);
+  const jibR=basisTenors.map(t=>jibStrip[t.jIdx]?.fairNACQ||0);
+  const bpArr=basisTenors.map(t=>((oisStrip[t.oIdx]?.fairNACQ||0)-(jibStrip[t.jIdx]?.fairNACQ||0))*100);
+
+  mkChart('c-basis-rates','line',basisLabels,
+    [
+      {label:'OIS Fair NACQ%',data:oisR.map(v=>+v.toFixed(4)),borderColor:'#00ffcc',
+        pointBackgroundColor:'#00ffcc',pointRadius:5,tension:.3,borderWidth:2},
+      {label:'JIBAR Fair NACQ%',data:jibR.map(v=>+v.toFixed(4)),borderColor:'#00b8ff',
+        pointBackgroundColor:'#00b8ff',pointRadius:5,tension:.3,borderDash:[4,3],borderWidth:1.5}
+    ]);
+  mkChart('c-basis-bp','bar',basisLabels,
+    [{label:'Basis (bp)',data:bpArr.map(v=>+v.toFixed(2)),
+      backgroundColor:bpArr.map(v=>v<0?'rgba(255,51,85,.55)':'rgba(0,230,118,.55)'),
+      borderColor:bpArr.map(v=>v<0?'#ff3355':'#00e676'),borderWidth:1}],
+    {yMin:Math.min(...bpArr)-5,yMax:Math.max(...bpArr)+5});
+
+  // Basis detail table
+  let bTH='';
+  basisTenors.forEach(({label,oIdx,jIdx})=>{
+    const o=oisStrip[oIdx],j=jibStrip[jIdx];
+    if(!o||!j)return;
+    const bp=((o.fairNACQ-j.fairNACQ)*100).toFixed(2);   // bp = pct_diff × 100
+    const dfSpread=((o.df-j.df)*10000).toFixed(4);        // DF spread in bp-equivalent
+    bTH+=`<tr>
+      <td class="cn">${label}</td>
+      <td class="cb2">${fp(j.fairNACQ,4)}</td>
+      <td class="cn">${fp(o.fairNACQ,4)}</td>
+      <td style="color:${+bp<0?'var(--red)':'var(--green)'}">${bp}</td>
+      <td class="cg2">${j.df.toFixed(6)}</td>
+      <td class="cn">${o.df.toFixed(6)}</td>
+      <td class="ca">${fmt(j.pv01*notional,0)}</td>
+      <td class="ca">${fmt(o.pv01,0)}</td>
+      <td class="cp">${dfSpread}bp</td>
+    </tr>`;
+  });
+  $('tb-basis').innerHTML=bTH;
+
+  // ─── IMPLIED FORWARDS TAB ───
+  const fwdPeriods=[
+    {lbl:'3M×6M',s:1,e:2},{lbl:'6M×9M',s:2,e:3},{lbl:'9M×12M',s:3,e:4},
+    {lbl:'12M×15M',s:4,e:5},{lbl:'15M×18M',s:5,e:6},{lbl:'18M×21M',s:6,e:7},
+    {lbl:'21M×24M',s:7,e:8},{lbl:'2Y×3Y',s:8,e:12},{lbl:'3Y×4Y',s:12,e:16},
+    {lbl:'4Y×5Y',s:16,e:20}
+  ];
+
+  const fwdLabsFull=fwdPeriods.map(p=>p.lbl);
+  const oisFwdFull=fwdPeriods.map(p=>{
+    const dt=oisC.tau[p.e]-oisC.tau[p.s];
+    const fwdNACC=(Math.log(oisC.DF[p.s])-Math.log(oisC.DF[p.e]))/dt;
+    return+(fwdNACC*100).toFixed(4);
+  });
+  const jibFwdFull=fwdPeriods.map(p=>{
+    if(p.e>jibC.N) return null;
+    const dt=jibC.tau[p.e]-jibC.tau[p.s];
+    const fwdNACC=(Math.log(jibC.DF[p.s])-Math.log(jibC.DF[p.e]))/dt;
+    return+(fwdNACC*100).toFixed(4);
+  });
+
+  // Implied repo: approximate as ZARONIA_fwd - 15bp spread (ZARONIA trades ~15bp below repo)
+  const repoFwdImpl=oisFwdFull.map(r=>+(r-0.15).toFixed(4));
+
+  mkChart('c-ois-fwds','bar',fwdLabsFull,
+    [{label:'OIS Fwd NACC%',data:oisFwdFull,
+      backgroundColor:oisFwdFull.map((_,i)=>`rgba(0,255,204,${0.3+i*0.04})`),
+      borderColor:'#00ffcc',borderWidth:1}]);
+  mkChart('c-jib-fwds','bar',fwdLabsFull,
+    [{label:'JIBAR Fwd NACC%',data:jibFwdFull,
+      backgroundColor:jibFwdFull.map((_,i)=>`rgba(0,184,255,${0.3+i*0.04})`),
+      borderColor:'#00b8ff',borderWidth:1}]);
+  mkChart('c-repo-fwd','line',fwdLabsFull,
+    [{label:'Implied Repo%',data:repoFwdImpl,borderColor:'#c77dff',
+      backgroundColor:'rgba(199,125,255,.07)',pointRadius:4,tension:.3,fill:true,borderWidth:2}]);
+  mkChart('c-fwd-compare','line',fwdLabsFull,
+    [
+      {label:'OIS Fwd%',data:oisFwdFull,borderColor:'#00ffcc',pointRadius:3,tension:.3,borderWidth:2},
+      {label:'JIBAR Fwd%',data:jibFwdFull,borderColor:'#00b8ff',pointRadius:3,tension:.3,borderDash:[4,3],borderWidth:1.5},
+      {label:'Repo Impl%',data:repoFwdImpl,borderColor:'#c77dff',pointRadius:3,tension:.3,borderDash:[2,4],borderWidth:1.5}
+    ]);
+
+  // Forward table
+  let fwdTH='';
+  fwdPeriods.forEach((p,idx)=>{
+    const oFwd=oisFwdFull[idx],jFwd=jibFwdFull[idx]||NaN;
+    const oisComp=((oisC.DF[p.s]/oisC.DF[p.e]-1)*100).toFixed(4)+'%';
+    const jibComp=p.e<=jibC.N?((jibC.DF[p.s]/jibC.DF[p.e]-1)*100).toFixed(4)+'%':'—';
+    const rImpl=repoFwdImpl[idx];
+    // spreads in bp: (A_pct - B_pct) * 100
+    const oisRepoSpread=((oFwd-rImpl)*100).toFixed(1);
+    const jibOisSpread=isNaN(jFwd)?NaN:((jFwd-oFwd)*100);
+    fwdTH+=`<tr>
+      <td class="cn">${p.lbl}</td>
+      <td class="cd2">${oisC.tau[p.s].toFixed(4)}</td>
+      <td class="cd2">${oisC.tau[p.e].toFixed(4)}</td>
+      <td class="cn">${fp(oFwd,4)}</td>
+      <td class="cn">${oisComp}</td>
+      <td class="cb2">${fp(jFwd,4)}</td>
+      <td class="cb2">${jibComp}</td>
+      <td class="cp">${fp(rImpl,4)}</td>
+      <td class="ca">${oisRepoSpread}bp</td>
+      <td style="color:${isNaN(jibOisSpread)||jibOisSpread>0?'var(--red)':'var(--green)'}">${isNaN(jibOisSpread)?'—':jibOisSpread.toFixed(1)+'bp'}</td>
+    </tr>`;
+  });
+  $('tb-fwds').innerHTML=fwdTH;
+
+  // ─── REPO TAB ───
+  const repoEff12=nacmEff(repoNACM)*100;
+  const repoNACCval=nacmToNACC(repoNACM)*100;
+  const repoNACQval=naccToNACQ(nacmToNACC(repoNACM))*100;
+  const ois1Rate=oisStrip.find(s=>s.label==='1Y')?.fairNACQ||NaN; // in percent
+  const jib3mRate=mkt.jibar3m*100; // convert decimal to percent for spread calcs
+  // Spread in bp = (rate_A_pct - rate_B_pct) × 100
+  const repoVsOIS  =(ois1Rate   - repoNACQval)*100;
+  const repoVsJIBAR=(jib3mRate  - repoNACQval)*100;
+
+  $('repo-kpi').innerHTML=`
+    <div class="kc p"><div class="kl">Repo NACM</div><div class="kv p">${fp(repoNACM*100,2)}</div><div class="ks">as quoted</div></div>
+    <div class="kc p"><div class="kl">Repo NACC</div><div class="kv p">${fp(repoNACCval,4)}</div><div class="ks">ln((1+r/12)¹²)</div></div>
+    <div class="kc p"><div class="kl">Repo NACQ</div><div class="kv p">${fp(repoNACQval,4)}</div><div class="ks">4×(e^(r/4)−1)</div></div>
+    <div class="kc p"><div class="kl">Repo Eff Ann</div><div class="kv p">${fp(repoEff12,4)}</div><div class="ks">(1+r/12)¹²−1</div></div>`;
+
+  // Repo conversion bar chart
+  mkChart('c-repo-conv','bar',['NACM (quoted)','NACC','NACQ','Eff Annual'],
+    [{label:'Rate (%)',data:[repoNACM*100,repoNACCval,repoNACQval,repoEff12].map(v=>+v.toFixed(4)),
+      backgroundColor:['rgba(199,125,255,.5)','rgba(199,125,255,.4)','rgba(199,125,255,.35)','rgba(199,125,255,.6)'],
+      borderColor:'#c77dff',borderWidth:1}]);
+
+  // Repo spread chart: show spread in bp = (swap_rate_pct - repo_NACQ_pct)*100
+  const termLabels=['6M','1Y','2Y','3Y','5Y'];
+  const oisTermRates=[oisStrip[0],oisStrip[1],oisStrip[3],oisStrip[4],oisStrip[5]].map(s=>s?.fairNACQ||0);
+  const jibTermRates=[jibStrip[0],jibStrip[1],jibStrip[3],jibStrip[4],jibStrip[5]].map(s=>s?.fairNACQ||0);
+  const repoSpreadOIS =oisTermRates.map(r=>+((r-repoNACQval)*100).toFixed(2)); // bp
+  const repoSpreadJIB =jibTermRates.map(r=>+((r-repoNACQval)*100).toFixed(2)); // bp
+  mkChart('c-repo-spread','line',termLabels,
+    [
+      {label:'OIS − Repo (bp)',data:repoSpreadOIS,borderColor:'#00ffe5',pointBackgroundColor:'#00ffe5',pointRadius:4,tension:.3,borderWidth:2},
+      {label:'JIBAR − Repo (bp)',data:repoSpreadJIB,borderColor:'#29b6f6',pointBackgroundColor:'#29b6f6',pointRadius:4,tension:.3,borderDash:[4,3],borderWidth:1.5}
+    ],{yTitle:'basis points (bp)'});
+
+  // Repo table — all rates in percent, spreads in bp = (A% - B%) * 100
+  const repoNACM_pct = repoNACM*100; // e.g. 6.75
+  const spNACM_OIS  = ((ois1Rate   - repoNACM_pct)*100).toFixed(1);
+  const spNACM_JIB  = ((jib3mRate  - repoNACM_pct)*100).toFixed(1);
+  const spNACC_OIS  = ((ois1Rate   - repoNACCval) *100).toFixed(1);
+  const spNACC_JIB  = ((jib3mRate  - repoNACCval) *100).toFixed(1);
+  const spNACQ_OIS  = repoVsOIS.toFixed(1);
+  const spNACQ_JIB  = repoVsJIBAR.toFixed(1);
+
+  $('tb-repo').innerHTML=`
+    <tr><td class="cp">NACM (as quoted)</td><td class="cp">${fp(repoNACM*100,4)}</td><td class="cp">${fp(repoEff12,4)}</td>
+      <td class="${+spNACM_OIS>=0?'sprd-pos':'sprd-neg'}">${spNACM_OIS}</td>
+      <td class="${+spNACM_JIB>=0?'sprd-pos':'sprd-neg'}">${spNACM_JIB}</td>
+      <td style="color:var(--t2)">Official SARB convention. Monthly compounding: r_eff=(1+r/12)¹²−1</td></tr>
+    <tr><td class="cp">NACC (continuous)</td><td class="cp">${fp(repoNACCval,4)}</td><td class="cp">${fp(repoEff12,4)}</td>
+      <td class="${+spNACC_OIS>=0?'sprd-pos':'sprd-neg'}">${spNACC_OIS}</td>
+      <td class="${+spNACC_JIB>=0?'sprd-pos':'sprd-neg'}">${spNACC_JIB}</td>
+      <td style="color:var(--t2)">Continuous: r_c=12·ln(1+r_m/12). Used in pricing PDEs.</td></tr>
+    <tr><td class="cp">NACQ (quarterly)</td><td class="cp">${fp(repoNACQval,4)}</td><td class="cp">${fp(repoEff12,4)}</td>
+      <td class="${+spNACQ_OIS>=0?'sprd-pos':'sprd-neg'}">${spNACQ_OIS}</td>
+      <td class="${+spNACQ_JIB>=0?'sprd-pos':'sprd-neg'}">${spNACQ_JIB}</td>
+      <td style="color:var(--t2)">r_q=4·(e^(r_c/4)−1). Comparable to NACQ swap fixed rates.</td></tr>
+    <tr><td class="cp">Eff Annual</td><td class="cp">${fp(repoEff12,4)}</td><td class="cp">${fp(repoEff12,4)}</td>
+      <td style="color:var(--t2)">—</td><td style="color:var(--t2)">—</td>
+      <td style="color:var(--t2)">True annually compounded return. Convention-invariant benchmark.</td></tr>`;
+
+  // ─── SCENARIO TAB ───
+  // Heatmap
+  const rowShifts=[-200,-100,-50,-25,0,25,50,100,200];
+  const colShifts=[-50,-25,-10,0,10,25,50];
+  function npvForScen(curveShift,fixedShift){
+    const m2={...mkt};
+    ['zaronia','jibar3m','fra_36','fra_69','fra_912','ois_1','ois_2','ois_3','ois_4','ois_5'].forEach(k=>{
+      if(m2[k]!==undefined) m2[k]+=curveShift/10000;
+    });
+    return priceOIS(bootstrapOIS(m2),notional,fixedNACQ+fixedShift/100,dir,tenorY).npv/1e6;
+  }
+  const grid=rowShifts.map(rs=>colShifts.map(cs=>npvForScen(rs,cs)));
+  const allV=grid.flat(),maxAbs=Math.max(...allV.map(Math.abs));
+  let hm=`<table style="border-collapse:collapse;font-family:var(--mono);font-size:9px;margin-bottom:4px">`;
+  hm+=`<tr><td style="padding:3px 8px;color:var(--t2);font-size:8px;text-align:right">Shift↓ / Fix→</td>`;
+  colShifts.forEach(cs=>hm+=`<td class="hm-hdr" style="padding:3px 8px;color:var(--t2);font-size:8px;text-align:center">${cs===0?'spot':cs>0?'+'+cs:cs}bp</td>`);
+  hm+=`</tr>`;
+  rowShifts.forEach((rs,ri)=>{
+    hm+=`<tr><td class="hml2">${rs===0?'spot':rs>0?'+'+rs:rs}bp</td>`;
+    colShifts.forEach((_,ci)=>{
+      const v=grid[ri][ci];
+      const t=v/maxAbs;
+      const bg=v>=0?`rgba(0,${Math.round(80+t*150)},${Math.round(t*80)},${0.15+Math.abs(t)*0.5})`
+        :`rgba(${Math.round(180+Math.abs(t)*75)},30,50,${0.15+Math.abs(t)*0.5})`;
+      const col=v>=0?`rgb(0,${Math.round(160+t*95)},${Math.round(t*100)})`:`rgb(${Math.round(200+Math.abs(t)*55)},60,80)`;
+      hm+=`<td class="hmc" style="background:${bg};color:${col}">${v.toFixed(2)}</td>`;
+    });
+    hm+=`</tr>`;
+  });
+  hm+=`</table>`;
+  $('heatmap').innerHTML=hm;
+
+  mkChart('c-scen-ois','line',scenR.map(s=>s===0?'0':s>0?`+${s}`:String(s)),
+    [{label:'NPV ZARm',data:scenNPV,borderColor:'#c77dff',backgroundColor:'rgba(199,125,255,.06)',
+      pointBackgroundColor:scenNPV.map(v=>v>=0?'#00e676':'#ff3355'),
+      pointRadius:4,tension:.3,fill:true,borderWidth:2}]);
+
+  // Fair rate sensitivity to curve shift
+  const fairVsShift=scenR.map(bp=>{
+    const m2={...mkt};
+    ['zaronia','jibar3m','fra_36','fra_69','fra_912','ois_1','ois_2','ois_3','ois_4','ois_5'].forEach(k=>{
+      if(m2[k]!==undefined) m2[k]+=bp/10000;
+    });
+    return +priceOIS(bootstrapOIS(m2),notional,fixedNACQ,dir,tenorY).fairNACQ.toFixed(4);
+  });
+  mkChart('c-scen-fair','line',scenR.map(s=>s===0?'0':s>0?`+${s}`:String(s)),
+    [{label:'Fair NACQ%',data:fairVsShift,borderColor:'#00ffcc',backgroundColor:'rgba(0,255,204,.06)',
+      pointBackgroundColor:'#00ffcc',pointRadius:4,tension:.3,fill:true,borderWidth:2}]);
+
+  // Scenario tiles
+  const tileShifts=[-200,-100,-50,-25,0,25,50,100,200,300];
+  let tilesH='';
+  tileShifts.forEach(bp=>{
+    const v=npvForScen(bp,0);
+    const c=v>=0?'var(--green)':'var(--red)';
+    tilesH+=`<div class="st${bp===0?' hi':''}">
+      <div class="stl">${bp===0?'SPOT':bp>0?`+${bp}bp`:`${bp}bp`}</div>
+      <div class="stv" style="color:${c}">${v.toFixed(3)}</div>
+      <div class="sts">ZAR m</div>
+    </div>`;
+  });
+  $('scen-tiles').innerHTML=tilesH;
+
+  // LOG
+  const elapsed=(performance.now()-t0).toFixed(1);
+  $('repriceMs').textContent=elapsed+'ms';
+  $('log').innerHTML=`
+<span class="ls">■ CURVES BOOTSTRAPPED · ${elapsed}ms</span><br>
+<span class="lk">OIS DF[4]  </span><span class="lv">${oisC.DF[4].toFixed(8)} (Y1)</span><br>
+<span class="lk">OIS DF[20] </span><span class="lv">${oisC.DF[20].toFixed(8)} (Y5)</span><br>
+<span class="lk">JIB DF[4]  </span><span class="lv">${jibC.DF[4].toFixed(8)} (Y1)</span><br>
+<span class="lk">JIB DF[40] </span><span class="lv">${jibC.DF[40].toFixed(8)} (Y10)</span><br>
+<span class="ls">■ REPO ${fp(repoNACM*100,2)} NACM → NACC ${fp(repoNACCval,4)} | NACQ ${fp(repoNACQval,4)}</span><br>
+<span class="lk">OIS 1Y Fair </span><span class="lv">${fp(oisStrip[1]?.fairNACQ,4)} | JIBAR 1Y Fair ${fp(jibStrip[1]?.fairNACQ,4)}</span><br>
+<span class="lk">Basis 1Y </span><span class="lv">${fbp(bas1,1)}</span><br>
+<span class="lk">Swap NPV </span><span class="lv">R ${fmt(sw.npv,0)} | PV01 R ${fmt(pv01,0)}</span>`;
+
+  $('dot').classList.remove('busy');
+}
+
+window.addEventListener('load',()=>{
+  // Set default dates for FRN inputs
+  const today = new Date();
+
+  // Default settle = today + 3 days
+  const settle = new Date(today); settle.setDate(today.getDate()+3);
+  $('frn-settle').value = fmt8(settle);
+
+  // Conversion date default = settle date
+  $('frn-convdate').value = fmt8(settle);
+
+  // Last reset: find most recent quarter start before today
+  // Assume quarterly on 15th of Mar/Jun/Sep/Dec relative to issue date 2022-09-15
+  const lastReset = new Date(today);
+  lastReset.setDate(15);
+  // Step back to most recent quarter
+  const qm = [2,5,8,11]; // 0-indexed months for Mar/Jun/Sep/Dec
+  let lm = lastReset.getMonth();
+  while(!qm.includes(lm)){lastReset.setMonth(--lm);lm=lastReset.getMonth();}
+  if(lastReset > today) lastReset.setMonth(lastReset.getMonth()-3);
+  $('frn-lastreset').value = fmt8(lastReset);
+
+  // Next reset = last reset + 3 months
+  const nextReset = new Date(lastReset);
+  nextReset.setMonth(nextReset.getMonth()+3);
+  $('frn-nextreset').value = fmt8(nextReset);
+
+  setTimeout(()=>{compute(true); priceFRN();},150);
+});
+
+// ════════════════════════════════════════════════════════
+// FRN PRICING ENGINE
+// ════════════════════════════════════════════════════════
+function priceFRN(){
+  // ── Read FRN inputs ──
+  const face      = +$('frn-face').value;
+  const issueDate = new Date($('frn-issue').value);
+  const matDate   = new Date($('frn-maturity').value);
+  const iSpread   = +$('frn-ispread').value / 10000;   // in decimal
+  const settleDate= new Date($('frn-settle').value);
+  const tSpread   = +$('frn-tspread').value / 10000;   // trading/discount margin
+  const lastJIBAR = +$('frn-lastjibar').value / 100;   // last set JIBAR in decimal
+  const lastReset = new Date($('frn-lastreset').value);
+  const nextReset = new Date($('frn-nextreset').value);
+  const convDate  = new Date($('frn-convdate').value);
+  const basisBP   = +$('frn-basis').value / 10000;     // OIS/JIBAR basis in decimal
+  const dcKey     = $('frn-dc').value;
+  const dcF       = dcKey==='act365'
+    ? (d1,d2)=>(d2-d1)/86400000/365
+    : (d1,d2)=>(d2-d1)/86400000/360;
+
+  // Rebuild curves (use current sidebar market data)
+  const mkt={
+    zaronia:+$('zaronia').value/100, jibar3m:+$('jibar3m').value/100,
+    fra_36:+$('fra_36').value/100,   fra_69:+$('fra_69').value/100,
+    fra_912:+$('fra_912').value/100, fra_1821:+$('fra_1821').value/100,
+    ois_1:+$('ois_1').value/100,     ois_2:+$('ois_2').value/100,
+    ois_3:+$('ois_3').value/100,     ois_4:+$('ois_4').value/100,
+    ois_5:+$('ois_5').value/100,     sw_j1:+$('sw_j1').value/100,
+    sw_j2:+$('sw_j2').value/100,     sw_j3:+$('sw_j3').value/100,
+    sw_j5:+$('sw_j5').value/100,     sw_j10:+$('sw_j10').value/100,
+  };
+  const jibC = bootstrapJIBAR(mkt);
+  const oisC = bootstrapOIS(mkt);
+
+  // ── Generate reset schedule ──
+  // Build all quarterly periods from issue to maturity
+  const periods = [];
+  let pStart = new Date(issueDate);
+  while(pStart < matDate){
+    const pEnd = new Date(pStart);
+    pEnd.setMonth(pEnd.getMonth()+3);
+    if(pEnd > matDate){ // last stub
+      const adjEnd = new Date(matDate);
+      periods.push({start:new Date(pStart), end:adjEnd, resetDate:new Date(pStart)});
+      break;
+    }
+    periods.push({start:new Date(pStart), end:new Date(pEnd), resetDate:new Date(pStart)});
+    pStart = new Date(pEnd);
+  }
+
+  // ── Helper: get JIBAR forward for a period using bootstrapped curve ──
+  // τ_s = years from settle to period start, τ_e = years from settle to end
+  // Forward simple rate (ACT/365): (DF(τ_s)/DF(τ_e) - 1) / dcf
+  function jibFwdForPeriod(tStart, tEnd){
+    // interpolate DF from JIBAR curve (quarterly pillars)
+    const tauS = dcF(settleDate, tStart);
+    const tauE = dcF(settleDate, tEnd);
+    if(tauS < 0) return lastJIBAR; // in the past
+    const interpDF = (tau) => {
+      // linear interpolation in log-DF space between quarterly pillars
+      const qtr = tau * 4; // position in quarters
+      const lo  = Math.max(0, Math.floor(qtr));
+      const hi  = Math.min(jibC.N, lo+1);
+      if(lo >= jibC.N) return jibC.DF[jibC.N];
+      if(lo===hi) return jibC.DF[lo];
+      const frac = qtr - lo;
+      return Math.exp(Math.log(jibC.DF[lo])*(1-frac) + Math.log(jibC.DF[hi])*frac);
+    };
+    const dfS = tauS <= 0 ? 1 : interpDF(tauS);
+    const dfE = interpDF(tauE);
+    const dt  = dcF(tStart, tEnd);
+    if(dt <= 0) return lastJIBAR;
+    return (dfS/dfE - 1) / dt; // simple forward rate
+  }
+
+  function oisFwdForPeriod(tStart, tEnd){
+    const tauS = dcF(settleDate, tStart);
+    const tauE = dcF(settleDate, tEnd);
+    const interpDF = (tau, curve) => {
+      const qtr = Math.max(0, tau * 4);
+      const lo  = Math.floor(qtr);
+      const hi  = Math.min(curve.N, lo+1);
+      if(lo >= curve.N) return curve.DF[curve.N];
+      if(lo===hi) return curve.DF[lo];
+      const frac = qtr - lo;
+      return Math.exp(Math.log(curve.DF[lo])*(1-frac) + Math.log(curve.DF[hi])*frac);
+    };
+    const dfS = tauS <= 0 ? 1 : interpDF(tauS, oisC);
+    const dfE = interpDF(tauE, oisC);
+    const dt  = dcF(tStart, tEnd);
+    if(dt <= 0) return mkt.zaronia/100;
+    return (dfS/dfE - 1) / dt;
+  }
+
+  function discDF(payDate, curve, tradingSpread){
+    const tau = dcF(settleDate, payDate);
+    if(tau <= 0) return 1;
+    const qtr = tau * 4;
+    const lo  = Math.floor(qtr);
+    const hi  = Math.min(curve.N, lo+1);
+    let baseDF;
+    if(lo >= curve.N) baseDF = curve.DF[curve.N];
+    else if(lo===hi)  baseDF = curve.DF[lo];
+    else{
+      const frac = qtr-lo;
+      baseDF = Math.exp(Math.log(curve.DF[lo])*(1-frac)+Math.log(curve.DF[hi])*frac);
+    }
+    // Apply trading spread: DF_adjusted = baseDF × e^(-spread × τ)
+    return baseDF * Math.exp(-tradingSpread * tau);
+  }
+
+  // ── Price JIBAR FRN ──
+  let dirtyJIBAR = 0;
+  let aiJIBAR = 0;
+  const pRecs = [];
+
+  // Accrued interest: current period
+  const aiPeriodDCF = dcF(lastReset, nextReset);
+  const aiDaysDCF   = dcF(lastReset, settleDate);
+  const currentCpnRate = lastJIBAR + iSpread; // locked in coupon rate for current period
+  aiJIBAR = (aiDaysDCF / aiPeriodDCF) * currentCpnRate * aiPeriodDCF * face;
+
+  for(let i=0; i<periods.length; i++){
+    const {start, end, resetDate} = periods[i];
+    const payDate = new Date(end);
+    if(payDate <= settleDate) continue; // skip past periods
+
+    const dt = dcF(start, end);
+    const tauPay = dcF(settleDate, payDate);
+
+    // Determine JIBAR fixing: current period uses last fixing, future uses forward
+    let jibRate, isLocked;
+    if(start <= lastReset && end > lastReset && settleDate < nextReset){
+      // We are within current coupon period
+      jibRate  = lastJIBAR;
+      isLocked = true;
+    } else {
+      // Forward-projected JIBAR
+      jibRate  = jibFwdForPeriod(start, end);
+      isLocked = false;
+    }
+
+    const cpnRate = jibRate + iSpread;
+    const cf_jibar = face * cpnRate * dt;
+    const dfJib    = discDF(payDate, jibC, tSpread);
+    const pvJibar  = cf_jibar * dfJib;
+    dirtyJIBAR += pvJibar;
+
+    // OIS equivalent: replace JIBAR with ZARONIA forward + basis spread
+    const oisRate    = oisFwdForPeriod(start, end);
+    const oisSpread  = iSpread + basisBP; // adjusted spread
+    const oisCpnRate = oisRate + oisSpread;
+    // ZARONIA: compound overnight → quarterly payment = face*(compFactor - 1)
+    // For forward-looking OIS period: use DF ratio from OIS curve
+    const compFactor  = 1 + oisRate * dt; // approximate for quarterly
+    const cf_ois      = face * (compFactor - 1 + oisSpread * dt);
+    const dfOis       = discDF(payDate, oisC, tSpread + basisBP);
+    const pvOis       = cf_ois * dfOis;
+
+    // Is this period after conversion date?
+    const afterConv = start >= convDate;
+
+    pRecs.push({
+      i:i+1, start, end, payDate, resetDate, dt, tauPay,
+      jibRate, cpnRate, cf_jibar, dfJib, pvJibar, isLocked,
+      oisRate, oisCpnRate, cf_ois, dfOis, pvOis, afterConv
+    });
+  }
+
+  // Add par redemption at maturity
+  const dfMatJib = discDF(matDate, jibC, tSpread);
+  const dfMatOis = discDF(matDate, oisC, tSpread + basisBP);
+  dirtyJIBAR += face * dfMatJib;
+
+  const cleanJIBAR = dirtyJIBAR - aiJIBAR;
+  const cleanPricePct = cleanJIBAR / face * 100;
+  const dirtyPricePct = dirtyJIBAR / face * 100;
+
+  // ZARONIA equivalent from conversion date
+  const oisPVcoupons = pRecs.filter(r=>r.afterConv).reduce((s,r)=>s+r.pvOis, 0);
+  const oisDirty = oisPVcoupons + face * dfMatOis;
+  const oisAI    = aiJIBAR; // same AI for conversion stub
+  const oisClean = oisDirty - oisAI;
+  const oisCleanPct = oisClean / face * 100;
+  const oisDirtyPct = oisDirty / face * 100;
+
+  // DM solve (Newton-Raphson) — find spread s such that dirty = mkt_dirty
+  // Use cleanJIBAR as "market" for self-consistency demo; in practice user would input mkt price
+  function calcDirtyForDM(dm){
+    let d = 0;
+    for(const r of pRecs){
+      const tau = dcF(settleDate, r.payDate);
+      if(tau <= 0) continue;
+      const qtr = tau*4;
+      const lo = Math.floor(qtr), hi = Math.min(jibC.N,lo+1);
+      let bDF = lo>=jibC.N ? jibC.DF[jibC.N] :
+        (lo===hi ? jibC.DF[lo] : Math.exp(Math.log(jibC.DF[lo])*(1-qtr+lo)+Math.log(jibC.DF[hi])*(qtr-lo)));
+      d += r.cf_jibar * bDF * Math.exp(-dm*tau);
+    }
+    const tauMat = dcF(settleDate, matDate);
+    const qM = tauMat*4;
+    const loM = Math.floor(qM), hiM = Math.min(jibC.N,loM+1);
+    let bDFm = loM>=jibC.N ? jibC.DF[jibC.N] :
+      (loM===hiM ? jibC.DF[loM] : Math.exp(Math.log(jibC.DF[loM])*(1-qM+loM)+Math.log(jibC.DF[hiM])*(qM-loM)));
+    d += face * bDFm * Math.exp(-dm*tauMat);
+    return d;
+  }
+
+  // Modified duration of FRN (fixed-rate approximation for current period)
+  let wDur = 0;
+  for(const r of pRecs){
+    if(r.tauPay>0) wDur += r.tauPay * r.pvJibar;
+  }
+  wDur += dcF(settleDate,matDate) * face * dfMatJib;
+  const modDur = wDur / dirtyJIBAR;
+
+  // DV01: duration × dirty × 1bp
+  const dv01frn = modDur * dirtyJIBAR * 0.0001;
+
+  // Spread duration (CS01): how much dirty price changes per 1bp spread widening
+  const cs01frn = -modDur * dirtyJIBAR * 0.0001; // approx same as DV01 for FRN
+
+  // ── KPI output ──
+  function kc(cls,label,val,sub){
+    return `<div class="kc ${cls}"><div class="kl">${label}</div><div class="kv ${cls}">${val}</div><div class="ks">${sub}</div></div>`;
+  }
+
+  $('frn-jibar-kpi').innerHTML =
+    kc('l','Clean Price',cleanPricePct.toFixed(4)+'%','vs par')+
+    kc('a','Dirty Price',dirtyPricePct.toFixed(4)+'%','incl accrued')+
+    kc('b','Accrued Int','R '+fmt(aiJIBAR,2),'settle '+fmt8(settleDate))+
+    kc('l','Cpn (locked)',fp(currentCpnRate*100,4),'JIBAR+spread')+
+    kc('a','Mod Duration',modDur.toFixed(4)+'y','price sensitivity')+
+    kc('r','DV01','R '+fmt(dv01frn,0),'per bp rate shift');
+
+  $('frn-ois-kpi').innerHTML =
+    kc('n','OIS Clean Px',oisCleanPct.toFixed(4)+'%','from conv date')+
+    kc('a','OIS Dirty Px',oisDirtyPct.toFixed(4)+'%','incl accrued')+
+    kc('n','OIS Spread',fp(((iSpread+basisBP)*10000).toFixed(1)+' bp → '+((iSpread+basisBP)*100).toFixed(4)+'%'),'issue+basis')+
+    kc('p','Px Difference',((oisCleanPct-cleanPricePct)*100).toFixed(2)+' bp','OIS vs JIBAR')+
+    kc('b','OIS Coupons','R '+fmt(oisPVcoupons,0),'PV from conv')+
+    kc('n','Conv Date',fmt8(convDate),'switch to OIS');
+
+  // ── CHARTS ──
+
+  // 1. Projected coupon strip
+  const cpnLabels = pRecs.map(r=>`P${r.i}`);
+  const jibCpns   = pRecs.map(r=>+(r.cpnRate*100).toFixed(4));
+  const oisCpns   = pRecs.map(r=>+(r.oisCpnRate*100).toFixed(4));
+  mkChart('c-frn-coupons','bar',cpnLabels,[
+    {label:'JIBAR Coupon Rate%',data:jibCpns,backgroundColor:pRecs.map(r=>r.isLocked?'rgba(204,255,144,.7)':'rgba(204,255,144,.35)'),borderColor:'#ccff90',borderWidth:1},
+    {label:'JIBAR Reset%',     data:pRecs.map(r=>+(r.jibRate*100).toFixed(4)),backgroundColor:'rgba(41,182,246,.3)',borderColor:'#29b6f6',borderWidth:1}
+  ]);
+
+  // 2. OIS vs JIBAR coupon basis spread (bp)
+  const basisComp = pRecs.map((r,i)=>+((oisCpns[i]-jibCpns[i])*100).toFixed(2));
+  mkChart('c-frn-basis-comp','bar',cpnLabels,[
+    {label:'OIS−JIBAR Cpn Spread (bp)',data:basisComp,
+      backgroundColor:basisComp.map(v=>v<0?'rgba(255,83,112,.5)':'rgba(0,230,118,.5)'),
+      borderColor:basisComp.map(v=>v<0?'#ff5370':'#69ff47'),borderWidth:1}
+  ],{yTitle:'bp'});
+
+  // 3. PV profile
+  mkChart('c-frn-pvprofile','bar',cpnLabels,[
+    {label:'JIBAR PV',data:pRecs.map(r=>Math.round(r.pvJibar)),backgroundColor:'rgba(204,255,144,.5)',borderColor:'#ccff90',borderWidth:1},
+    {label:'OIS PV', data:pRecs.map(r=>Math.round(r.pvOis)), backgroundColor:'rgba(0,255,229,.3)', borderColor:'#00ffe5',borderWidth:1}
+  ]);
+
+  // 4. Clean price sensitivity to trading spread
+  const sensSpreads = Array.from({length:21},(_,i)=>-100+i*10); // -100 to +100 bp
+  const sensClean   = sensSpreads.map(dBP=>{
+    const s = tSpread + dBP/10000;
+    let d = 0;
+    for(const r of pRecs){
+      const dfJ = discDF(r.payDate, jibC, s);
+      d += r.cf_jibar * dfJ;
+    }
+    d += face * discDF(matDate, jibC, s);
+    return +((d - aiJIBAR)/face*100).toFixed(4);
+  });
+  mkChart('c-frn-spread-sens','line',sensSpreads.map(s=>s===0?'0':s>0?`+${s}`:String(s)),[
+    {label:'Clean Price%',data:sensClean,borderColor:'#ffd54f',backgroundColor:'rgba(255,213,79,.07)',
+      pointBackgroundColor:sensClean.map(v=>v>=100?'#69ff47':'#ff5370'),
+      pointRadius:3,tension:.3,fill:true,borderWidth:2}
+  ]);
+
+  // ── Reset schedule table ──
+  let tH = '';
+  for(const r of pRecs){
+    const status = r.isLocked ? '🔒 LOCKED' : r.afterConv ? '⟳ OIS EQUIV' : '◦ PROJECTED';
+    const sc = r.isLocked?'cl':'ca';
+    tH += `<tr style="${r.isLocked?'background:rgba(204,255,144,.04)':''}${r.afterConv&&!r.isLocked?'background:rgba(0,255,229,.03)':''}">
+      <td class="cn">${r.i}</td>
+      <td class="cd2">${fmt8(r.resetDate)}</td>
+      <td class="cd2">${fmt8(r.start)}</td>
+      <td class="cd2">${fmt8(r.payDate)}</td>
+      <td class="cd2">${r.dt.toFixed(5)}</td>
+      <td class="${r.isLocked?'cl':'ca'}">${(r.jibRate*100).toFixed(4)}%</td>
+      <td class="cl">${(r.cpnRate*100).toFixed(4)}%</td>
+      <td class="cl">${fmt(r.cf_jibar,2)}</td>
+      <td class="cd2">${r.dfJib.toFixed(6)}</td>
+      <td class="cl">${fmt(r.pvJibar,2)}</td>
+      <td class="cn">${(r.oisCpnRate*100).toFixed(4)}%</td>
+      <td class="cn">${fmt(r.cf_ois,2)}</td>
+      <td class="cd2">${r.dfOis.toFixed(6)}</td>
+      <td class="cn">${fmt(r.pvOis,2)}</td>
+      <td style="font-size:8px;color:${r.isLocked?'var(--lime)':r.afterConv?'var(--neon)':'var(--t2)'}">${status}</td>
+    </tr>`;
+  }
+  // Add maturity redemption row
+  tH += `<tr style="background:var(--bg3);font-weight:700;border-top:1px solid var(--bd2)">
+    <td class="ca" colspan="7">REDEMPTION AT MATURITY</td>
+    <td class="cl">${fmt(face,0)}</td>
+    <td class="cd2">${dfMatJib.toFixed(6)}</td>
+    <td class="cl">${fmt(face*dfMatJib,2)}</td>
+    <td class="cn">—</td>
+    <td class="cn">${fmt(face,0)}</td>
+    <td class="cd2">${dfMatOis.toFixed(6)}</td>
+    <td class="cn">${fmt(face*dfMatOis,2)}</td>
+    <td class="cd2">${fmt8(matDate)}</td>
+  </tr>
+  <tr style="background:var(--bg4);font-weight:700;border-top:2px solid var(--bd3)">
+    <td class="ca" colspan="7">TOTAL — DIRTY PRICE</td>
+    <td class="cl">—</td><td class="cd2">—</td>
+    <td class="cl">${fmt(dirtyJIBAR,2)} (${dirtyPricePct.toFixed(4)}%)</td>
+    <td class="cn">—</td><td class="cn">—</td><td class="cd2">—</td>
+    <td class="cn">${fmt(oisDirty,2)} (${oisDirtyPct.toFixed(4)}%)</td>
+    <td class="cl">AI: R ${fmt(aiJIBAR,2)}</td>
+  </tr>`;
+
+  $('tb-frn').innerHTML = tH;
+}
+
+</script>
+</body>
+</html>
