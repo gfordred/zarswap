@@ -8,8 +8,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
-  --bg:#010108;--bg1:#050510;--bg2:#08081a;--bg3:#0c0c22;--bg4:#10102a;
-  --bd:#0f0f28;--bd2:#181838;--bd3:#222248;--bd4:#303068;
+  --bg:#02020e;--bg1:#06061a;--bg2:#090920;--bg3:#0d0d28;--bg4:#121230;
+  --bd:#141430;--bd2:#1c1c40;--bd3:#262650;--bd4:#343460;
   --neon:#00ffd4;--neon2:rgba(0,255,212,.1);
   --blue:#38c8ff;--blue2:rgba(56,200,255,.1);
   --gold:#ffc832;--gold2:rgba(255,200,50,.08);
@@ -20,12 +20,12 @@
   --org:#ff8c00;--pink:#ff60b0;
   --tx0:#ffffff;--tx1:#d0d0f0;--tx2:#7878b8;--tx3:#3a3a68;--tx4:#1a1a40;
   --mono:'JetBrains Mono',monospace;
-  --sbw:282px;--hh:44px;--barh:26px;--tkh:26px;
+  --sbw:282px;--hh:44px;--barh:26px;--tkh:28px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
 html,body{height:100%;overflow:hidden}
-body{background:var(--bg);color:var(--tx1);font-family:var(--mono);font-size:11px;line-height:1.45}
-body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,20,.04) 2px,rgba(0,0,20,.04) 4px);pointer-events:none;z-index:9000}
+body{background:var(--bg);color:var(--tx1);font-family:var(--mono);font-size:12px;line-height:1.5}
+/* scan-line removed for desk readability */
 
 /* ── HEADER ── */
 .hdr{
@@ -39,14 +39,14 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
   color:var(--tx2);font-size:13px;transition:all .12s;flex-shrink:0}
 .sbt:hover{background:var(--bg3);color:var(--neon);border-color:rgba(0,255,212,.4)}
 .logo{font-size:15px;font-weight:700;color:var(--neon);letter-spacing:.14em;
-  text-shadow:0 0 24px rgba(0,255,212,.6),0 0 48px rgba(0,255,212,.2)}
+  text-shadow:0 0 10px rgba(0,255,212,.25)}
 .hpipe{width:1px;height:22px;background:var(--bd3)}
 .hsub{font-size:9px;font-weight:600;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase}
 .mbadge{background:linear-gradient(90deg,rgba(0,255,212,.15),rgba(56,200,255,.08));
   border:1px solid rgba(0,255,212,.35);border-radius:2px;padding:3px 11px;
   font-size:8px;font-weight:800;color:var(--neon);letter-spacing:.14em;text-transform:uppercase;
-  animation:mglow 3s ease-in-out infinite}
-@keyframes mglow{0%,100%{box-shadow:0 0 8px rgba(0,255,212,.25)}50%{box-shadow:0 0 18px rgba(0,255,212,.5)}}
+  }
+
 .hright{margin-left:auto;display:flex;align-items:center;gap:8px}
 .hbadge{font-size:8px;font-weight:600;color:var(--tx3);background:var(--bg3);
   border:1px solid var(--bd2);padding:2px 8px;border-radius:2px;letter-spacing:.08em;text-transform:uppercase}
@@ -73,8 +73,8 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .ig{margin-bottom:13px}
 
 /* Sidebar section headers */
-.sh{font-size:7.5px;font-weight:700;letter-spacing:.16em;color:var(--tx3);
-  text-transform:uppercase;padding:4px 0;margin-bottom:6px;
+.sh{font-size:9px;font-weight:700;letter-spacing:.13em;color:var(--tx2);
+  text-transform:uppercase;padding:5px 0;margin-bottom:8px;
   display:flex;align-items:center;gap:5px;border-bottom:1px solid var(--bd)}
 .sa{width:3px;height:8px;border-radius:1px;flex-shrink:0;background:var(--neon)}
 .sa.am{background:var(--gold)}.sa.bl{background:var(--blue)}.sa.pu{background:var(--pur)}
@@ -83,7 +83,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
 /* Inputs */
 .ir{display:flex;align-items:center;gap:5px;margin-bottom:3px}
-.il{flex:0 0 80px;font-size:9px;color:var(--tx2);font-weight:500;letter-spacing:.02em}
+.il{flex:0 0 84px;font-size:10px;color:var(--tx2);font-weight:500;letter-spacing:.01em}
 .if{flex:1;background:rgba(0,0,0,.5);border:1px solid var(--bd3);
   color:var(--neon);font-family:var(--mono);font-size:11px;font-weight:600;
   padding:4px 7px;outline:none;border-radius:2px;text-align:right;
@@ -107,8 +107,8 @@ select.if{color:var(--gold);cursor:pointer}
 .tabs{display:flex;background:var(--bg1);border-bottom:2px solid var(--bd2);
   flex-shrink:0;overflow-x:auto;padding:0 6px}
 .tabs::-webkit-scrollbar{height:0}
-.tab{padding:0 13px;height:38px;font-size:8.5px;font-weight:700;letter-spacing:.11em;
-  text-transform:uppercase;color:var(--tx3);cursor:pointer;
+.tab{padding:0 18px;height:46px;font-size:12px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--tx2);cursor:pointer;
   border-bottom:2px solid transparent;margin-bottom:-2px;
   white-space:nowrap;transition:all .12s;display:flex;align-items:center;gap:5px}
 .tab:hover{color:var(--tx1)}
@@ -131,33 +131,33 @@ select.if{color:var(--gold);cursor:pointer}
 /* ── KPI CARDS ── */
 .kg{display:grid;gap:7px}
 .kc{background:var(--bg2);border:1px solid var(--bd);border-radius:2px;
-  padding:10px 12px;position:relative;overflow:hidden;transition:border-color .12s}
+  padding:12px 14px;position:relative;overflow:hidden;transition:border-color .12s}
 .kc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0;opacity:.8}
 .kc.n::before{background:var(--neon)}.kc.b::before{background:var(--blue)}.kc.a::before{background:var(--gold)}
 .kc.g::before{background:var(--grn)}.kc.p::before{background:var(--pur)}.kc.r::before{background:var(--red)}
 .kc.l::before{background:var(--lime)}.kc.c::before{background:var(--cyan)}
 .kc:hover{border-color:var(--bd4)}
-.kl{font-size:8px;font-weight:700;color:var(--tx3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px}
-.kv{font-size:15px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.01em;transition:all .2s}
-.kv.lg{font-size:20px;font-weight:800}
-.kv.sm{font-size:12px}
-.kv.n{color:var(--neon);text-shadow:0 0 14px rgba(0,255,212,.4)}
-.kv.b{color:var(--blue);text-shadow:0 0 12px rgba(56,200,255,.35)}
-.kv.a{color:var(--gold);text-shadow:0 0 12px rgba(255,200,50,.35)}
-.kv.g{color:var(--grn);text-shadow:0 0 10px rgba(57,255,128,.35)}
-.kv.p{color:var(--pur);text-shadow:0 0 10px rgba(204,136,255,.3)}
-.kv.r{color:var(--red);text-shadow:0 0 10px rgba(255,51,85,.3)}
-.kv.l{color:var(--lime);text-shadow:0 0 10px rgba(184,255,64,.3)}
+.kl{font-size:10px;font-weight:700;color:var(--tx2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px}
+.kv{font-size:22px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em;transition:all .2s}
+.kv.lg{font-size:28px;font-weight:800}
+.kv.sm{font-size:14px;font-weight:700}
+.kv.n{color:var(--neon);text-shadow:0 0 8px rgba(0,255,212,.2)}
+.kv.b{color:var(--blue);text-shadow:0 0 6px rgba(56,200,255,.15)}
+.kv.a{color:var(--gold);text-shadow:0 0 6px rgba(255,200,50,.15)}
+.kv.g{color:var(--grn);text-shadow:0 0 6px rgba(57,255,128,.15)}
+.kv.p{color:var(--pur);text-shadow:0 0 6px rgba(204,136,255,.12)}
+.kv.r{color:var(--red);text-shadow:0 0 6px rgba(255,51,85,.12)}
+.kv.l{color:var(--lime);text-shadow:0 0 6px rgba(184,255,64,.12)}
 .kv.c{color:var(--cyan)}.kv.w{color:var(--tx0)}
-.ks{font-size:8px;color:var(--tx2);margin-top:4px;line-height:1.4;font-weight:500}
+.ks{font-size:10px;color:var(--tx2);margin-top:5px;line-height:1.4;font-weight:500}
 
 /* ── CHARTS ── */
 .cg{display:grid;gap:10px}
 .cg.c2{grid-template-columns:1fr 1fr}
 .cg.c3{grid-template-columns:1fr 1fr 1fr}
 .cb{background:var(--bg2);border:1px solid var(--bd);border-radius:2px;padding:10px 12px;display:flex;flex-direction:column}
-.ct{font-size:8px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--tx3);margin-bottom:8px;flex-shrink:0;display:flex;align-items:center;gap:6px}
-.ctd{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.ct{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tx2);margin-bottom:8px;flex-shrink:0;display:flex;align-items:center;gap:6px}
+.ctd{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .cw{position:relative;width:100%}
 .cw canvas{display:block;width:100%!important}
 
@@ -165,13 +165,13 @@ select.if{color:var(--gold);cursor:pointer}
 .tw{background:var(--bg2);border:1px solid var(--bd);border-radius:2px;overflow:hidden}
 table{width:100%;border-collapse:collapse}
 thead tr{background:var(--bg3);border-bottom:1px solid var(--bd2)}
-th{font-size:8px;font-weight:700;color:var(--tx3);letter-spacing:.12em;text-transform:uppercase;
-  padding:6px 8px;text-align:right;white-space:nowrap}
+th{font-size:10px;font-weight:700;color:var(--tx2);letter-spacing:.08em;text-transform:uppercase;
+  padding:7px 9px;text-align:right;white-space:nowrap}
 th:first-child{text-align:left}
 tbody tr{border-bottom:1px solid rgba(15,15,40,.9);transition:background .06s}
 tbody tr:last-child{border-bottom:none}
 tbody tr:hover{background:rgba(255,255,255,.03)}
-td{padding:4px 8px;text-align:right;font-size:10px;font-weight:500;color:var(--tx1);font-variant-numeric:tabular-nums;white-space:nowrap}
+td{padding:5px 9px;text-align:right;font-size:12px;font-weight:500;color:var(--tx1);font-variant-numeric:tabular-nums;white-space:nowrap}
 td:first-child{text-align:left;color:var(--tx2);font-weight:600}
 .cn{color:var(--neon)!important;font-weight:700}.cb2{color:var(--blue)!important;font-weight:700}
 .ca{color:var(--gold)!important;font-weight:700}.cg2{color:var(--grn)!important;font-weight:700}
@@ -181,23 +181,23 @@ td:first-child{text-align:left;color:var(--tx2);font-weight:600}
 
 /* ── SPREAD TILES ── */
 .stg{display:grid;gap:5px}
-.st{background:var(--bg2);border:1px solid var(--bd);padding:8px 6px;border-radius:2px;text-align:center;transition:border-color .1s}
+.st{background:var(--bg2);border:1px solid var(--bd);padding:10px 8px;border-radius:2px;text-align:center;transition:border-color .1s}
 .st.hi{border-color:rgba(0,255,212,.3);background:rgba(0,255,212,.03)}
-.stl{font-size:7.5px;font-weight:700;color:var(--tx3);margin-bottom:3px;letter-spacing:.1em;text-transform:uppercase}
-.stv{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
-.sts{font-size:7px;color:var(--tx3);margin-top:2px}
+.stl{font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:4px;letter-spacing:.08em;text-transform:uppercase}
+.stv{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
+.sts{font-size:8px;color:var(--tx3);margin-top:3px}
 
 /* ── HEATMAP ── */
-.hmc{font-size:9px;font-weight:700;font-family:var(--mono);padding:5px 7px;text-align:center;border-radius:2px;min-width:60px;font-variant-numeric:tabular-nums}
-.hml2{font-size:8px;color:var(--tx3);padding:4px 8px;text-align:right;font-weight:700}
+.hmc{font-size:10px;font-weight:700;font-family:var(--mono);padding:5px 7px;text-align:center;border-radius:2px;min-width:60px;font-variant-numeric:tabular-nums}
+.hml2{font-size:9px;color:var(--tx3);padding:4px 8px;text-align:right;font-weight:700}
 
 /* ── MATH BOXES ── */
 .math-box{background:var(--bg3);border:1px solid var(--bd2);border-left:3px solid var(--gold);
-  border-radius:2px;padding:11px 14px;margin-bottom:8px;font-size:9.5px;line-height:1.85;color:var(--tx2)}
-.math-box h4{color:var(--gold);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:7px;font-weight:700}
-.math-box .fm{color:var(--neon);font-size:10px;font-weight:600;background:rgba(0,255,212,.07);
+  border-radius:2px;padding:11px 14px;margin-bottom:8px;font-size:10px;line-height:1.85;color:var(--tx2)}
+.math-box h4{color:var(--gold);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px;font-weight:700}
+.math-box .fm{color:var(--neon);font-size:10.5px;font-weight:600;background:rgba(0,255,212,.07);
   border:1px solid rgba(0,255,212,.15);padding:4px 10px;border-radius:2px;display:block;margin:4px 0}
-.math-box .ref{color:var(--tx3);font-size:8px;font-style:italic;margin-top:4px;display:block}
+.math-box .ref{color:var(--tx3);font-size:8.5px;font-style:italic;margin-top:4px;display:block}
 .math-box strong{color:var(--tx0);font-weight:700}
 .math-box hr{border:none;border-top:1px solid var(--bd2);margin:8px 0}
 .math-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
@@ -215,8 +215,8 @@ td:first-child{text-align:left;color:var(--tx2);font-weight:600}
 .sbar{height:var(--barh);background:var(--bg1);border-top:2px solid var(--bd2);
   display:flex;align-items:center;padding:0 14px;gap:0;font-size:8.5px;color:var(--tx3);flex-shrink:0}
 .sbi{display:flex;align-items:center;gap:5px;padding:0 12px}
-.sbil{font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3)}
-.sbiv{font-weight:700;font-variant-numeric:tabular-nums;font-size:9.5px}
+.sbil{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3)}
+.sbiv{font-weight:800;font-variant-numeric:tabular-nums;font-size:13px}
 .sbsep{width:1px;height:14px;background:var(--bd3)}
 
 /* ── MIGRATION GUIDE ── */
@@ -272,37 +272,35 @@ td:first-child{text-align:left;color:var(--tx2);font-weight:600}
 /* ── ANIMATIONS ── */
 @keyframes flash{0%{opacity:.2}50%{opacity:1}100%{opacity:1}}
 .flash{animation:flash .3s ease}
-/* ── TICKER ── */
+/* ── MARKET SNAPSHOT BAR (replaces scrolling ticker) ── */
 .ticker{height:var(--tkh);background:var(--bg1);border-bottom:1px solid var(--bd2);
-  display:flex;align-items:center;overflow:hidden;flex-shrink:0}
-.tk-label{flex-shrink:0;padding:0 10px;border-right:1px solid var(--bd2);
-  display:flex;align-items:center;gap:6px;height:100%}
-.tk-tag{font-size:7px;font-weight:800;letter-spacing:.12em;color:var(--neon);
-  background:rgba(0,255,229,.1);border:1px solid rgba(0,255,229,.25);
-  padding:1px 5px;border-radius:1px;text-transform:uppercase}
-.tk-ts{font-size:7px;color:var(--t3);white-space:nowrap}
-.tk-scroll{flex:1;overflow:hidden}
-.tk-inner{display:flex;align-items:center;white-space:nowrap;
-  animation:tk-run 60s linear infinite}
-.tk-inner:hover{animation-play-state:paused}
-@keyframes tk-run{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.tk-sep{width:1px;height:12px;background:var(--bd3);margin:0 14px;flex-shrink:0}
-.tk-sec{display:flex;align-items:center;gap:12px;padding:0 8px}
-.tk-sec-lbl{font-size:7px;font-weight:800;color:var(--t3);letter-spacing:.12em;text-transform:uppercase;margin-right:2px}
-.tk-item{display:flex;align-items:center;gap:4px;font-variant-numeric:tabular-nums}
-.tk-name{font-size:7.5px;font-weight:700;color:var(--t2)}
-.tk-val{font-size:9px;font-weight:700;color:var(--t1)}
-.tk-up{font-size:7.5px;font-weight:700;color:var(--green)}
-.tk-dn{font-size:7.5px;font-weight:700;color:var(--red)}
-.tk-flat{font-size:7.5px;color:var(--t3)}
-.tk-sub{font-size:7px;color:var(--t3)}
-.tk-btn{flex-shrink:0;padding:0 9px;border-left:1px solid var(--bd2);height:100%;
-  display:flex;align-items:center;gap:4px;cursor:pointer;color:var(--t2);
-  font-size:7.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  display:flex;align-items:center;overflow:hidden;flex-shrink:0;gap:0}
+.tk-label{flex-shrink:0;padding:0 12px;border-right:1px solid var(--bd2);
+  display:flex;align-items:center;gap:7px;height:100%}
+.tk-tag{font-size:8px;font-weight:800;letter-spacing:.1em;color:var(--neon);
+  background:rgba(0,255,212,.08);border:1px solid rgba(0,255,212,.2);
+  padding:2px 7px;border-radius:1px;text-transform:uppercase}
+.tk-ts{font-size:8px;color:var(--tx3);white-space:nowrap}
+/* Static snapshot items — no scroll animation */
+.tk-scroll{flex:1;overflow:hidden;display:flex;align-items:center}
+.tk-inner{display:flex;align-items:center;gap:0;width:100%}
+.tk-sep{width:1px;height:14px;background:var(--bd3);margin:0 2px;flex-shrink:0}
+.tk-sec{display:flex;align-items:center;gap:0;padding:0 6px}
+.tk-sec-lbl{font-size:8px;font-weight:800;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase;margin-right:8px;border-right:1px solid var(--bd3);padding-right:8px}
+.tk-item{display:flex;align-items:center;gap:5px;font-variant-numeric:tabular-nums;padding:0 8px;border-right:1px solid var(--bd3)}
+.tk-name{font-size:8.5px;font-weight:700;color:var(--tx2)}
+.tk-val{font-size:10px;font-weight:800;color:var(--tx1)}
+.tk-up{font-size:8px;font-weight:700;color:var(--red)}
+.tk-dn{font-size:8px;font-weight:700;color:var(--grn)}
+.tk-flat{font-size:8px;color:var(--tx3)}
+.tk-sub{font-size:7.5px;color:var(--tx3)}
+.tk-btn{flex-shrink:0;padding:0 11px;border-left:1px solid var(--bd2);height:100%;
+  display:flex;align-items:center;gap:5px;cursor:pointer;color:var(--tx2);
+  font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
   background:transparent;border-top:none;border-bottom:none;border-right:none;
   font-family:var(--mono);transition:color .1s}
 .tk-btn:hover{color:var(--neon)}
-.tk-cd{font-variant-numeric:tabular-nums}
+.tk-cd{font-variant-numeric:tabular-nums;font-size:8.5px}
 .sbt{width:26px;height:26px;background:transparent;border:1px solid var(--bd3);
   border-radius:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;
   color:var(--t2);font-size:12px;transition:all .1s;flex-shrink:0;font-family:var(--mono)}
@@ -325,7 +323,7 @@ td:first-child{text-align:left;color:var(--tx2);font-weight:600}
   <div class="logo">ZAR RATES DESK</div>
   <div class="hpipe" style="width:1px;height:22px;background:var(--bd3)"></div>
   <div class="hsub">JIBAR → ZARONIA TRANSITION · FIXED INCOME · SOUTH AFRICA 2026</div>
-  <span class="mbadge">⟳ IBOR REFORM 2026</span>
+  <span class="hbadge" style="color:var(--gold);border-color:rgba(255,200,50,.3);background:rgba(255,200,50,.06)">JIBAR CESSATION DEC 2026</span>
   <div class="hright">
     <div class="hdot" id="dot"></div>
     <span class="hbadge hlive">● LIVE</span>
@@ -347,6 +345,21 @@ td:first-child{text-align:left;color:var(--tx2);font-weight:600}
 <!-- SIDEBAR -->
 <div class="sb" id="sidebar">
 <div class="sbs">
+
+  <!-- ASSUMPTIONS IN FORCE — always visible -->
+  <div style="background:rgba(255,200,50,.07);border:1px solid rgba(255,200,50,.3);border-radius:2px;padding:9px 11px;margin-bottom:14px">
+    <div style="font-size:8.5px;font-weight:800;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px">⚑ Assumptions in Force</div>
+    <div style="font-size:9px;color:var(--tx2);line-height:2.0">
+      <div><span style="color:var(--tx3)">Calendar</span> &nbsp;<span style="color:var(--grn)">Jhb 2026-2027 ✓</span></div>
+      <div><span style="color:var(--tx3)">Day count</span> &nbsp;ACT/365 Fixed</div>
+      <div><span style="color:var(--tx3)">Interpolation</span> &nbsp;Log-linear DF (7 pillars)</div>
+      <div><span style="color:var(--tx3)">DM convention</span> &nbsp;JSE simple rate</div>
+      <div><span style="color:var(--tx3)">ZARONIA reset</span> &nbsp;5 bd lookback (approx)</div>
+      <div><span style="color:var(--tx3)">JIBAR cessation</span> &nbsp;Dec 2026 (FSCA)</div>
+    </div>
+    <div style="font-size:8px;color:var(--grn);margin-top:7px">✓ SA holidays 2026-2027 active</div>
+  </div>
+
   <div class="ig">
     <div class="sh"><span class="sa rp"></span>SARB / Money Market</div>
     <div class="ir"><span class="il">Repo NACM</span><input class="if rp" id="repo" type="number" step="0.01" value="6.75"><span class="iu">%</span></div>
@@ -366,6 +379,7 @@ td:first-child{text-align:left;color:var(--tx2);font-weight:600}
     <div class="ir"><span class="il">SASW2</span><input class="if jb" id="sw_j2" type="number" step="0.001" value="7.080"><span class="iu">%</span></div>
     <div class="ir"><span class="il">SASW3</span><input class="if jb" id="sw_j3" type="number" step="0.001" value="7.110"><span class="iu">%</span></div>
     <div class="ir"><span class="il">SASW5</span><input class="if jb" id="sw_j5" type="number" step="0.001" value="7.260"><span class="iu">%</span></div>
+    <div class="ir"><span class="il">SASW7</span><input class="if jb" id="sw_j7" type="number" step="0.001" value="7.516"><span class="iu">%</span></div>
     <div class="ir"><span class="il">SASW10</span><input class="if jb" id="sw_j10" type="number" step="0.001" value="7.900"><span class="iu">%</span></div>
   </div>
   <div class="ig">
@@ -379,7 +393,7 @@ td:first-child{text-align:left;color:var(--tx2);font-weight:600}
   <div class="ig">
     <div class="sh"><span class="sa pu"></span>OIS Pricer</div>
     <div class="ir"><span class="il">Tenor</span><select class="if" id="swTenor" style="color:var(--pur)"><option value="0.5">6M</option><option value="1" selected>1Y</option><option value="1.5">18M</option><option value="2">2Y</option><option value="3">3Y</option><option value="4">4Y</option><option value="5">5Y</option></select><span class="iu"></span></div>
-    <div class="ir"><span class="il">Notional</span><input class="if" id="notional" type="number" step="10000000" value="500000000"><span class="iu"></span></div>
+    <div class="ir"><span class="il">Notional</span><input class="if" id="notional" type="number" step="10" value="500" style="color:var(--pur)"><span class="iu">Rm</span></div>
     <div class="ir"><span class="il">Fixed NACQ</span><input class="if" id="fixedRate" type="number" step="0.01" value="7.25"><span class="iu">%</span></div>
     <div class="ir"><span class="il">Direction</span><select class="if" id="direction"><option value="1">PAY FIXED</option><option value="-1">RCV FIXED</option></select><span class="iu"></span></div>
   </div>
@@ -390,7 +404,7 @@ td:first-child{text-align:left;color:var(--tx2);font-weight:600}
     <div class="ir"><span class="il">6M basis</span><input class="if re" id="basis_6m" type="number" step="0.5" value="-14"><span class="iu">bp</span></div>
     <div class="ir"><span class="il">9M basis</span><input class="if re" id="basis_9m" type="number" step="0.5" value="-13"><span class="iu">bp</span></div>
     <div class="ir"><span class="il">1Y+ basis</span><input class="if re" id="basis" type="number" step="0.5" value="-12"><span class="iu">bp</span></div>
-    <div style="font-size:8px;color:var(--tx3);line-height:1.6;margin-top:4px">ZARONIA ~12–20bp below JIBAR 3M<br>Y2+ uses OIS par quotes directly</div>
+    <div style="font-size:8px;color:var(--tx3);line-height:1.6;margin-top:4px">ZARONIA ~12–20bp below JIBAR 3M<br><span style="color:var(--gold)">Basis affects Q1-Q4 OIS short end only.</span><br>Y2+ is anchored to OIS par swap quotes.</div>
   </div>
   <div class="ig">
     <div class="sh"><span class="sa"></span>Engine Log</div>
@@ -714,19 +728,43 @@ td:first-child{text-align:left;color:var(--tx2);font-weight:600}
 <!-- ── FRN PRICER ── -->
 <div class="tc" id="tc-frn">
 
-  <!-- ── HEADER MATH NOTE ── -->
-  <div class="math-box" style="border-left-color:var(--lime)">
+  <!-- ── PRIMARY WORKFLOW SUMMARY — first thing trader sees ── -->
+  <div id="frn-summary-row" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px">
+    <div class="kc n" style="border-left:3px solid var(--neon)">
+      <div class="kl">JIBAR Clean Px</div><div class="kv n" id="fsum-jib-clean">—</div><div class="ks">vs par</div>
+    </div>
+    <div class="kc a">
+      <div class="kl">JIBAR Dirty Px</div><div class="kv a" id="fsum-jib-dirty">—</div><div class="ks">settlement price</div>
+    </div>
+    <div class="kc l">
+      <div class="kl">Fair ZARONIA Spread</div><div class="kv l" id="fsum-fair-spread">—</div><div class="ks">XIRR-equalised</div>
+    </div>
+    <div class="kc" id="fsum-xirr-card">
+      <div class="kl">XIRR Delta</div><div class="kv" id="fsum-xirr-delta">—</div><div class="ks">ZARONIA − JIBAR</div>
+    </div>
+    <div class="kc r">
+      <div class="kl">CS01 (spread)</div><div class="kv r" id="fsum-cs01">—</div><div class="ks">per 1bp DM shift</div>
+    </div>
+  </div>
+
+  <!-- ── METHODOLOGY NOTE (collapsible) ── -->
+  <details style="margin-bottom:8px">
+  <summary style="cursor:pointer;font-size:9px;font-weight:700;color:var(--tx2);letter-spacing:.1em;text-transform:uppercase;padding:5px 0;list-style:none;display:flex;align-items:center;gap:6px">
+    <span style="color:var(--lime)">▶</span> PRICING METHODOLOGY — QuantLib / JSE Convention
+  </summary>
+  <div class="math-box" style="border-left-color:var(--lime);margin-top:6px">
     <h4 style="color:var(--lime)">📋 JIBAR FRN Pricing — QuantLib FloatingRateBond Methodology</h4>
     A JIBAR-linked FRN pays <strong>quarterly coupons = (JIBAR₃M_reset + spread) × N × DCF</strong>.
     The current coupon is <em>locked in</em> at the last reset date's JIBAR fixing; future coupons are <em>projected</em> using the JIBAR forward curve.
-    <span class="fm">Dirty Price = Σᵢ [ CF_i × DF_jibar(tᵢ) × e^(−dm × τᵢ) ] + N × DF_jibar(T) × e^(−dm × T)</span>
+    <span class="fm">Dirty Price = Σᵢ [ CF_i × DF_jibar(tᵢ) / (1 + DM × τᵢ) ] + N × DF_jibar(T) / (1 + DM × T)</span>
     where <strong>dm</strong> = discount margin above JIBAR curve, <strong>τᵢ</strong> = ACT/365 tenor to payment date.
     <span class="fm">Accrued Interest = (days_since_reset / days_in_period) × coupon_rate × N</span>
     <span class="fm">Clean Price = Dirty Price − Accrued Interest</span>
     The <strong>ZARONIA equivalent note</strong> replaces remaining JIBAR-projected coupons with ZARONIA overnight-compounded coupons,
     using <span class="fm">ZARONIA_spread = issue_spread + OIS/JIBAR_basis</span> and OIS discount factors from the ZARONIA curve.
-    <span class="ref">Ref: QuantLib FloatingRateBond; Fabozzi (2012) §FRN Valuation; ISDA 2006 §6.2 Reset Convention</span>
+    <span class="ref">Ref: QuantLib FloatingRateBond; Fabozzi (2012) §FRN Valuation; ISDA 2006 §6.2 Reset Convention; JSE Debt Listing Requirements §11.3</span>
   </div>
+  </details>
 
   <!-- ── FRN INPUTS (self-contained within tab) ── -->
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:4px">
@@ -828,6 +866,17 @@ td:first-child{text-align:left;color:var(--tx2);font-weight:600}
     <div class="cb">
       <div class="ct"><span class="ctd" style="background:var(--cyan)"></span>Coupon Differential: JIBAR CF − ZARONIA CF (ZAR)</div>
       <div class="cw" style="height:175px"><canvas id="c-frn-basis-comp"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ── PROTOTYPE ASSUMPTIONS PANEL ── -->
+  <div style="background:rgba(255,51,85,.06);border:1px solid rgba(255,51,85,.25);border-radius:2px;padding:10px 14px;margin-bottom:8px;font-size:9.5px;color:var(--tx2);line-height:1.9">
+    <div style="font-size:9px;font-weight:800;color:var(--red);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">⚠ Prototype Simplifications Active</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 20px">
+      <div>▸ <strong style="color:var(--grn)">SA holidays 2026-2027 ✓</strong> — gazetted JSE public holidays applied with Modified Following convention. Production: extend to full <code style="color:var(--neon);font-size:9px">ql.SouthAfrica()</code> calendar.</div>
+      <div>▸ <strong style="color:var(--tx1)">Log-linear DF interpolation</strong> — produces piecewise-constant forwards. Market practice uses monotone convex for tenors beyond 2Y.</div>
+      <div>▸ <strong style="color:var(--tx1)">ZARONIA lookback approximated</strong> — the 5 Johannesburg business day lookback period is modelled as a DF ratio approximation, not exact daily compounding with calendar-adjusted observation dates.</div>
+      <div>▸ <strong style="color:var(--tx1)">OIS/JIBAR basis user-input</strong> — in production, the tenor basis strip is bootstrapped from quoted ZARONIA/JIBAR basis swaps (SARB MPG addendum).</div>
     </div>
   </div>
 
@@ -991,7 +1040,7 @@ td:first-child{text-align:left;color:var(--tx2);font-weight:600}
       <div class="tech-card tech-card-warn">
         <div class="tech-title" style="color:var(--red)">⚠ PRODUCTION CAVEATS</div>
         <div class="tech-body">
-          <strong>Holiday calendar:</strong> Payment dates not adjusted for ZA public holidays. Production requires <code style="color:var(--neon)">ql.SouthAfrica()</code> calendar with modified following convention.<br><br>
+          <strong>Holiday calendar:</strong> SA public holidays 2026-2027 now active with Modified Following adjustment. Production extends to <code style="color:var(--neon)">ql.SouthAfrica()</code> for all dates.<br><br>
           <strong>Basis term structure:</strong> Uses constant basis per tenor bucket from sidebar. Production basis should be bootstrapped from quoted ZARONIA/JIBAR basis swaps (3M, 6M, 1Y, 2Y, 5Y).<br><br>
           <strong>Interpolation:</strong> Log-linear DF interpolation between annual pillars. QuantLib production uses <em>LogLinearDiscount</em> with exact day-count-adjusted pillar dates.<br><br>
           <strong>FRN stub handling:</strong> Assumes clean quarterly schedule from issue date. Non-standard stubs (first short, first long) not handled.<br><br>
@@ -1118,6 +1167,56 @@ const dateStr=d=>d.toISOString().slice(0,10);
 function addMonths(d,m){const r=new Date(d);r.setMonth(r.getMonth()+m);return r}
 function dcf365(d1,d2){return(d2-d1)/(86400000*365)}
 
+// ── SA PUBLIC HOLIDAYS 2026-2027 ──
+// Source: South Africa gazetted public holidays (Public Holidays Act 36 of 1994)
+// When a holiday falls on Sunday, it is observed on Monday
+const SA_HOLIDAYS = new Set([
+  // 2026
+  '2026-01-01', // New Year's Day
+  '2026-03-21', // Human Rights Day
+  '2026-04-03', // Good Friday
+  '2026-04-06', // Family Day (Easter Monday)
+  '2026-04-27', // Freedom Day
+  '2026-05-01', // Workers' Day
+  '2026-06-16', // Youth Day
+  '2026-08-10', // Women's Day (observed Mon, 9 Aug is Sun)
+  '2026-09-24', // Heritage Day
+  '2026-12-16', // Day of Reconciliation
+  '2026-12-25', // Christmas Day
+  '2026-12-26', // Day of Goodwill
+  // 2027
+  '2027-01-01', // New Year's Day
+  '2027-03-22', // Human Rights Day (observed Mon, 21 Mar is Sun)
+  '2027-03-26', // Good Friday
+  '2027-03-29', // Family Day (Easter Monday)
+  '2027-04-27', // Freedom Day
+  '2027-05-03', // Workers' Day (observed Mon, 1 May is Sat)
+  '2027-06-16', // Youth Day
+  '2027-08-09', // Women's Day
+  '2027-09-24', // Heritage Day
+  '2027-12-16', // Day of Reconciliation
+  '2027-12-27', // Christmas Day (observed Mon, 25 Dec is Sat)
+  '2027-12-26', // Day of Goodwill (observed Sun→Mon: 27 Dec taken above)
+]);
+
+function isHoliday(d){ return SA_HOLIDAYS.has(d.toISOString().slice(0,10)); }
+function isWeekend(d){ const dw=d.getDay(); return dw===0||dw===6; }
+function isBusinessDay(d){ return !isWeekend(d) && !isHoliday(d); }
+
+// Adjust date forward to next JSE business day (Modified Following)
+function adjustModFollow(d){
+  const orig = new Date(d);
+  let adj = new Date(d);
+  // Move forward if not a business day
+  while(!isBusinessDay(adj)) adj.setDate(adj.getDate()+1);
+  // If we moved into next month, go back instead (Modified = go back)
+  if(adj.getMonth() !== orig.getMonth()){
+    adj = new Date(orig);
+    while(!isBusinessDay(adj)) adj.setDate(adj.getDate()-1);
+  }
+  return adj;
+}
+
 // ── SCHEDULE GENERATOR — backward from maturity, JSE convention ──
 // Generates quarterly payment dates stepping backward from maturity.
 // Avoids addMonths calendar-rolling errors on 31st/30th of month.
@@ -1145,7 +1244,8 @@ function buildSchedule(issueDate, matDate){
   }
   // Ensure issue date is the start of the first period
   if(dates.length === 0 || dates[0].getTime() !== matDate.getTime()){}
-  return dates; // array of period END dates (payment dates)
+  // Apply Modified Following business day adjustment to each payment date
+  return dates.map(d => adjustModFollow(d)); // array of adjusted payment dates
 }
 
 // ── SASW1 CONSISTENCY CHECK ──
@@ -1254,34 +1354,55 @@ function bootstrapOIS(mkt){
   const DF=new Array(N+1).fill(0);
   DF[0]=1;
 
-  // ── Q1 (0→3M): ZARONIA O/N compounded ──
-  // True 3M OIS DF from O/N rate: DF(3M) ≈ 1/(1 + zaronia × dt)^1
-  // More precisely: overnight compounded over ~91 days
-  // ois_3m_simple = zaronia + basis_on (OIS/JIBAR spread at ON tenor)
-  const ois_3m_rate = zaronia + basis_on;
-  // Compound daily approximation: (1 + r_ON/365)^91 ≈ 1 + r_ON × dt
-  // We use the more accurate: DF[1] = 1/(1 + ois_3m_rate × dt[0])
-  // which is the OIS deposit convention (simple rate, not continuous)
-  DF[1] = 1/(1 + ois_3m_rate * dt[0]);
+  // ── Y1 OIS Bootstrap: ZARONIA deposit (Q1) + log-linear interp to par-swap (Q4) ──
+  //
+  // The correct approach for OIS Y1:
+  //   1. Anchor Q1 from ZARONIA O/N deposit rate (simple rate convention)
+  //   2. Anchor Q4 from the OIS 1Y par swap (most liquid instrument)
+  //   3. Interpolate Q2, Q3 log-linearly between Q1 and Q4
+  //
+  // This eliminates the structural Q4 forward rate hump caused by mixing
+  // FRA-derived Q1-Q3 with a par-swap-derived Q4 (instruments with different
+  // credit/liquidity content).
+  //
+  // QuantLib equivalent: OISRateHelper for O/N and 1Y, PiecewiseYieldCurve bootstrap
+  //
+  const ois_3m_rate = zaronia + (basis_on||0);  // ZARONIA O/N + ON basis → 3M OIS rate
+  DF[1] = 1/(1 + ois_3m_rate * dt[0]);          // Q1: ZARONIA deposit, simple rate
 
-  // ── Q2-Q4: FRA strip adjusted by basis per tenor bucket ──
-  const ois_36  = fra_36  + (basis_3m||basis_on);
+  // Q4: OIS 1Y par swap (solve analytically with Q2,Q3 as unknowns via iteration)
+  // Iterative solve: Q2 = exp(log(DF1)*(2/3) + log(DF4)*(1/3))
+  //                  Q3 = exp(log(DF1)*(1/3) + log(DF4)*(2/3))
+  //                  Par: r1/4*(DF1+DF2+DF3+DF4) = 1-DF4
+  const ois_36  = fra_36  + (basis_3m||basis_on);   // kept for display/reference
   const ois_69  = fra_69  + (basis_6m||basis_on);
   const ois_912 = fra_912 + (basis_9m||basis_on);
-  DF[2] = DF[1]/(1 + ois_36  * dt[1]);
-  DF[3] = DF[2]/(1 + ois_69  * dt[2]);
-  DF[4] = DF[3]/(1 + ois_912 * dt[3]);
 
-  // ── Override Q4 with OIS 1Y par swap — ALWAYS prefer par swap (more liquid) ──
-  // Par condition: ois_1/4 × (DF[1]+DF[2]+DF[3]+DF[4]) = 1 − DF[4]
-  // Solve analytically: DF[4] = (1 − r1×(DF[1]+DF[2]+DF[3])) / (1 + r1)
   if(ois_1 > 0){
     const r1 = ois_1/4;
-    const ann3 = DF[1]+DF[2]+DF[3];
-    const df4_par = (1 - r1*ann3)/(1 + r1);
-    if(df4_par > 0 && df4_par < 1){
-      DF[4] = df4_par; // always use par swap — it is the liquid market instrument
+    const logDF1 = Math.log(DF[1]);
+    // Iterate: Q4 depends on Q2,Q3; Q2,Q3 depend on Q4
+    let df4 = Math.exp(-ois_1 * tau[4]); // initial guess
+    for(let it=0; it<30; it++){
+      const logDF4 = Math.log(Math.max(df4, 1e-9));
+      const df2 = Math.exp(logDF1*(2/3) + logDF4*(1/3));
+      const df3 = Math.exp(logDF1*(1/3) + logDF4*(2/3));
+      const ann3 = DF[1] + df2 + df3;
+      const df4_new = (1 - r1*ann3)/(1 + r1);
+      if(Math.abs(df4_new - df4) < 1e-14) { df4 = df4_new; break; }
+      df4 = df4_new;
     }
+    if(df4 > 0 && df4 < 1){
+      DF[4] = df4;
+      const logDF4 = Math.log(df4);
+      DF[2] = Math.exp(logDF1*(2/3) + logDF4*(1/3));
+      DF[3] = Math.exp(logDF1*(1/3) + logDF4*(2/3));
+    }
+  } else {
+    // Fallback to FRA strip if no OIS 1Y quote
+    DF[2] = DF[1]/(1 + ois_36  * dt[1]);
+    DF[3] = DF[2]/(1 + ois_69  * dt[2]);
+    DF[4] = DF[3]/(1 + ois_912 * dt[3]);
   }
 
   // ── Y2-Y5: par NACQ swap bootstrap (NR, same as JIBAR) ──
@@ -1349,7 +1470,7 @@ function bootstrapOIS(mkt){
 // ════════════════════════════════════════
 function bootstrapJIBAR(mkt){
   // mkt rates are DECIMAL (e.g. 0.0676)
-  const {jibar3m,fra_36,fra_69,fra_912,sw_j1,sw_j2,sw_j3,sw_j5,sw_j10}=mkt;
+  const {jibar3m,fra_36,fra_69,fra_912,sw_j1,sw_j2,sw_j3,sw_j5,sw_j7,sw_j10}=mkt;
   const N=40; // 10Y quarterly
   const today=new Date();today.setHours(0,0,0,0);
   const dates=[today];
@@ -1371,11 +1492,14 @@ function bootstrapJIBAR(mkt){
   //   Par condition: rPar/4 × Σ_{i=1}^{Q} DF[i] = 1 − DF[Q]
   //   Intermediates between prevQ and Q are log-linear in DF[Q].
   //   Newton-Raphson on the single unknown d = DF[Q].
-  const jPillars=[[4,sw_j1],[8,sw_j2],[12,sw_j3],[20,sw_j5],[40,sw_j10]];
+  const jPillars=[[4,sw_j1],[8,sw_j2],[12,sw_j3],[20,sw_j5],[28,sw_j7||0],[40,sw_j10]];
   let prevQ=0;
 
   for(const[Q,rPar] of jPillars){
-    if(!rPar||rPar<=0){ prevQ=Q; continue; }
+    // CRITICAL: only update prevQ when we actually fill this pillar.
+    // If rPar is missing, skip but do NOT advance prevQ — the next populated
+    // pillar will interpolate all the way from the last known anchor.
+    if(!rPar||rPar<=0){ continue; }  // ← do NOT set prevQ=Q here
     const r4 = rPar/4;
 
     if(Q===4){
@@ -1525,16 +1649,18 @@ function schedule(){
   clearTimeout(_timer);
   _timer=setTimeout(()=>compute(true),90);
 }
+function onIfChange(el){
+  el.classList.add('changed');
+  setTimeout(()=>el.classList.remove('changed'),700);
+  const frnIds=['frn-face','frn-issue','frn-maturity','frn-ispread','frn-settle',
+    'frn-tspread','frn-lastjibar','frn-lastreset','frn-nextreset','frn-convdate','frn-basis','frn-dc'];
+  if(frnIds.includes(el.id)){ clearTimeout(_timer); _timer=setTimeout(priceFRN,120); }
+  else{ schedule(); try{updateGuide();}catch(e){} }
+}
 document.querySelectorAll('.if').forEach(el=>{
-  el.addEventListener('input',()=>{
-    el.classList.add('changed');
-    setTimeout(()=>el.classList.remove('changed'),700);
-    // FRN-specific inputs reprice FRN; all others reprice curves
-    const frnIds=['frn-face','frn-issue','frn-maturity','frn-ispread','frn-settle',
-      'frn-tspread','frn-lastjibar','frn-lastreset','frn-nextreset','frn-convdate','frn-basis','frn-dc'];
-    if(frnIds.includes(el.id)) { clearTimeout(_timer); _timer=setTimeout(priceFRN,120); }
-    else schedule();
-  });
+  // <select> fires 'change', <input>/<date> fires 'input' — register both to be safe
+  el.addEventListener('input',  ()=>onIfChange(el));
+  el.addEventListener('change', ()=>onIfChange(el));
 });
 
 // ════════════════════════════════════════
@@ -1560,6 +1686,7 @@ function compute(log=true){
     sw_j2:   +$('sw_j2').value   /100,
     sw_j3:   +$('sw_j3').value   /100,
     sw_j5:   +$('sw_j5').value   /100,
+    sw_j7:   +$('sw_j7').value   /100,
     sw_j10:  +$('sw_j10').value  /100,
     // OIS/JIBAR basis by tenor (decimal)
     basis_on: +$('basis_on').value /10000,
@@ -1569,7 +1696,7 @@ function compute(log=true){
     basis_1y: +$('basis').value    /10000,
   };
   const repoNACM=+$('repo').value/100;
-  const notional=+$('notional').value;
+  const notional=+$('notional').value * 1e6; // input is in Rm
   const fixedNACQ=+$('fixedRate').value;
   const dir=+$('direction').value;
   const tenorY=+$('swTenor').value;
@@ -1598,7 +1725,9 @@ function compute(log=true){
   const repoNACCimplied=[null];
   // Approximate: short-end OIS ~ repo + ZARONIA spread (~10bp)
   // We use the OIS forward rates as proxies for implied policy rate expectations
-  for(let i=1;i<=20;i++) repoNACCimplied.push((oisC.fwd[i]||0)*100-0.15); // -15bp ZARONIA/repo spread
+  // Implied repo = OIS forward - ZARONIA/repo spread (from basis inputs, approx O/N basis)
+  const zaroniaRepoSpread = Math.abs(mkt.basis_on*100) || 0.15; // O/N basis in %, fallback 15bp
+  for(let i=1;i<=20;i++) repoNACCimplied.push((oisC.fwd[i]||0)*100-zaroniaRepoSpread);
 
   // ─── STATUS BAR ───
   const ois1=oisStrip.find(s=>s.label==='1Y');
@@ -1682,8 +1811,11 @@ function compute(log=true){
   mkChart('c-ois-strip','line',tenorLabels,
     [{label:'OIS Fair NACQ%',data:oisFairRates,borderColor:'#00ffcc',backgroundColor:'rgba(0,255,204,.06)',
       pointBackgroundColor:'#00ffcc',pointRadius:5,tension:.3,fill:true,borderWidth:2}]);
+  // JIBAR fair rate chart: use jibStrip directly (its own labels and rates)
+  // Do NOT use jibFairRates which is OIS-tenor-matched and misaligned
   mkChart('c-jib-strip','line',jibStrip.map(s=>s.label),
-    [{label:'JIBAR Fair NACQ%',data:jibFairRates,borderColor:'#00b8ff',backgroundColor:'rgba(0,184,255,.06)',
+    [{label:'JIBAR Fair NACQ%',data:jibStrip.map(s=>+s.fairNACQ.toFixed(4)),
+      borderColor:'#00b8ff',backgroundColor:'rgba(0,184,255,.06)',
       pointBackgroundColor:'#00b8ff',pointRadius:5,tension:.3,fill:true,borderWidth:2}]);
 
   // Basis chart — full term structure from O/N through 5Y
@@ -1693,7 +1825,7 @@ function compute(log=true){
   // O/N: zaronia vs jibar3m (both annualised, in %)
   const oisFwdQ = [0,1,2,3].map(i=>(oisC.fwd[i+1]||0)*100);  // Q1,Q2,Q3,Q4
   const jibFwdQ = [0,1,2,3].map(i=>(jibC.fwd[i+1]||0)*100);
-  const onBasis  = (mkt.zaronia*100) - (mkt.jibar3m*100); // approximate O/N basis
+  const onBasis  = (mkt.zaronia - mkt.jibar3m) * 10000; // O/N basis in bp (decimal→bp)
   // Short-end forward basis at each quarter
   const shortBasisArr = [
     onBasis,                              // O/N
@@ -1712,16 +1844,19 @@ function compute(log=true){
   ],{yTitle:'basis points (bp)'});
 
   // Forward comparison
-  const fwdLabels=['Q1','Q2','Q3','Q4','Q6','Q8','Q12','Q16','Q20'];
-  const fwdIdx=[1,2,3,4,6,8,12,16,20];
-  const oisFwds=fwdIdx.map(i=>(oisC.fwd[i]||0)*100);
-  const jibFwds=fwdIdx.map(i=>(jibC.fwd[i]||0)*100);
+  // Forward chart: JIBAR goes to Q40 (10Y), OIS only to Q20 (5Y)
+  // Use JIBAR label set; set OIS to null beyond its last pillar
+  const fwdLabels=['Q1','Q2','Q3','Q4','Q6','Q8','Q12','Q16','Q20','Q24','Q28','Q32','Q40'];
+  const fwdIdx=   [1,   2,   3,   4,   6,   8,   12,  16,  20,  24,  28,  32,  40];
+  const jibFwds=fwdIdx.map(i=>+(( jibC.fwd[i]||0)*100).toFixed(4));
+  // OIS curve only has N=20 pillars — set null for indices beyond oisC.N
+  const oisFwds=fwdIdx.map(i=> i<=oisC.N ? +((oisC.fwd[i]||0)*100).toFixed(4) : null);
   mkChart('c-fwd-overview','line',fwdLabels,
     [
-      {label:'OIS Fwd NACC%',data:oisFwds.map(v=>+v.toFixed(4)),borderColor:'#00ffcc',
-        pointRadius:4,tension:.3,borderWidth:2},
-      {label:'JIBAR Fwd NACC%',data:jibFwds.map(v=>+v.toFixed(4)),borderColor:'#00b8ff',
-        pointRadius:4,tension:.3,borderDash:[4,3],borderWidth:1.5}
+      {label:'OIS Fwd NACC% (to 5Y)',data:oisFwds,borderColor:'#00ffcc',
+        pointRadius:4,tension:.3,borderWidth:2,spanGaps:false},
+      {label:'JIBAR Fwd NACC% (to 10Y)',data:jibFwds,borderColor:'#00b8ff',
+        pointRadius:4,tension:.3,borderDash:[4,3],borderWidth:1.5,spanGaps:false}
     ]);
 
   // ─── OIS PRICER TAB ───
@@ -1749,10 +1884,12 @@ function compute(log=true){
     return dir*(flt-fix);
   }
   const cs01=(cs01Bump(bp1)-cs01Bump(-bp1))/2;
-  const pvFixBump=notional*((fixedNACQ+0.01)/4/100)*sw.ann;
-  const dv01=-dir*(pvFixBump-sw.pvFixed);
+  // DV01 fixed leg: central difference ±1bp on fixed NACQ rate
+  const pvFixUp  = notional*((fixedNACQ+0.01)/4/100)*sw.ann;
+  const pvFixDn  = notional*((fixedNACQ-0.01)/4/100)*sw.ann;
+  const dv01 = -dir*(pvFixUp-pvFixDn)/2; // central difference, more accurate
   let wD=0;for(let i=1;i<=nQtrs;i++) wD+=oisC.tau[i]*sw.fixedCFs[i-1].pv;
-  const modDur=wD/sw.pvFixed;
+  const modDur = sw.pvFixed > 1 ? wD/sw.pvFixed : wD/(notional*0.001); // guard div by ~0
 
   // KPIs
   $('ois-kpi').innerHTML=`
@@ -1829,14 +1966,20 @@ function compute(log=true){
       {label:'Float CF',data:sw.floatCFs.map(c=>Math.round(c.cf)),backgroundColor:'rgba(24,255,255,.3)',borderColor:'#18ffff',borderWidth:1}
     ]);
 
-  const cs01Attr=sw.floatCFs.map((_,i)=>{
-    const netPV=dir*(sw.floatCFs[i].pv-sw.fixedCFs[i].pv);
-    return +(-oisC.tau[i+1]*netPV/10000).toFixed(0);
+  // PV01 attribution per quarter: sensitivity of each quarterly net PV to parallel curve shift
+  // = -τᵢ × (PVfloat_i - PVfixed_i) × 1bp — for OIS this ≈ -(float_CF×DF) × τ × 1bp
+  const pv01Attr=sw.floatCFs.map((_,i)=>{
+    const fPV=sw.floatCFs[i].pv; // PV of float payment i
+    return +(-oisC.tau[i+1]*fPV/10000).toFixed(0);
+  });
+  // DV01 fixed leg per quarter: sensitivity of fixed PV to fixed rate shift
+  const dv01Attr=sw.fixedCFs.map((x,i)=>{
+    return +(oisC.tau[i+1]*x.pv/10000*dir).toFixed(0);
   });
   mkChart('c-ois-risk','bar',qLabels,
     [
-      {label:'PV01',data:cs01Attr,backgroundColor:cs01Attr.map(v=>v>=0?'rgba(255,170,48,.55)':'rgba(255,51,85,.55)'),borderColor:cs01Attr.map(v=>v>=0?'#ffa940':'#ff3355'),borderWidth:1},
-      {label:'CS01',data:cs01Attr.map(v=>+v.toFixed(0)),backgroundColor:'rgba(199,125,255,.3)',borderColor:'#c77dff',borderWidth:1}
+      {label:'Float PV01 (ZAR/bp)',data:pv01Attr,backgroundColor:pv01Attr.map(v=>v>=0?'rgba(255,170,48,.55)':'rgba(255,51,85,.55)'),borderColor:pv01Attr.map(v=>v>=0?'#ffa940':'#ff3355'),borderWidth:1},
+      {label:'Fixed DV01 (ZAR/bp)',data:dv01Attr,backgroundColor:dv01Attr.map(v=>v>=0?'rgba(199,125,255,.45)':'rgba(57,255,128,.35)'),borderColor:dv01Attr.map(v=>v>=0?'#c77dff':'#39ff80'),borderWidth:1}
     ]);
 
   // CF table
@@ -1885,12 +2028,15 @@ function compute(log=true){
     [{label:'Fwd NACC%',data:jibC.fwd.slice(1,jN+1).map(r=>+(r*100).toFixed(4)),
       borderColor:'#ffaa30',backgroundColor:'rgba(255,170,48,.06)',
       pointRadius:2,tension:.3,fill:true,borderDash:[4,3],borderWidth:1.5}]);
+  // Note: step jumps at pillar transitions (Q4,Q8,Q12,Q20,Q28,Q40) are
+  // the mathematically correct result of log-linear DF interpolation between pillars.
+  // Each segment has a constant forward rate = log(DF[prevQ]/DF[Q]) / (Q-prevQ)×dt.
 
   // JIBAR curve table (20 rows)
   const jibInstr={1:'JIBAR 3M',2:'FRA 3×6',3:'FRA 6×9',4:'FRA 9×12',
-    8:'SASW2',12:'SASW3',20:'SASW5',40:'SASW10'};
+    8:'SASW2',12:'SASW3',20:'SASW5',28:'SASW7',40:'SASW10'};
   let jibTH='';
-  for(let i=0;i<=20;i++){
+  for(let i=0;i<=40;i++){
     const instr=i===0?'Spot':(jibInstr[i]||'(interp)');
     const isInterp=i>0&&!jibInstr[i];
     jibTH+=`<tr${isInterp?' style="opacity:.55"':''}>
@@ -2222,6 +2368,7 @@ function compute(log=true){
   $('repriceMs').textContent=elapsed+'ms';
   $('log').innerHTML=`
 <span class="ls">■ CURVES BOOTSTRAPPED · ${elapsed}ms</span><br>
+<span class="lk">Basis inputs </span><span class="lv">O/N=${(mkt.basis_on*10000).toFixed(1)}bp | 3M=${(mkt.basis_3m*10000).toFixed(1)}bp | 6M=${(mkt.basis_6m*10000).toFixed(1)}bp | 9M=${(mkt.basis_9m*10000).toFixed(1)}bp | 1Y+=${(mkt.basis_1y*10000).toFixed(1)}bp</span><br>
 ${jibC.sasw1Warn?`<span class="ls">⚠ ${jibC.sasw1Warn}</span><br>`:''}
 <span class="lk">OIS DF[4]  </span><span class="lv">${oisC.DF[4].toFixed(8)} (Y1)</span><br>
 <span class="lk">OIS DF[20] </span><span class="lv">${oisC.DF[20].toFixed(8)} (Y5)</span><br>
@@ -2230,9 +2377,12 @@ ${jibC.sasw1Warn?`<span class="ls">⚠ ${jibC.sasw1Warn}</span><br>`:''}
 <span class="ls">■ REPO ${fp(repoNACM*100,2)} NACM → NACC ${fp(repoNACCval,4)} | NACQ ${fp(repoNACQval,4)}</span><br>
 <span class="lk">OIS 1Y Fair </span><span class="lv">${fp(oisStrip[1]?.fairNACQ,4)} | JIBAR 1Y Fair ${fp(jibStrip[1]?.fairNACQ,4)}</span><br>
 <span class="lk">Basis 1Y </span><span class="lv">${fbp(bas1,1)}</span><br>
-<span class="lk">Swap NPV </span><span class="lv">R ${fmt(sw.npv,0)} | PV01 R ${fmt(pv01,0)}</span>`;
+<span class="lk">Swap NPV </span><span class="lv">R ${fmt(sw.npv,0)} | PV01 R ${fmt(pv01,0)}</span><br>
+<span class="lk">Tenor/Dir </span><span class="lv">${tenorY}Y ${dir===1?"PAY":"RCV"} FIXED @ ${fp(fixedNACQ,3)} | Notional R${(notional/1e6).toFixed(0)}m</span><br>
+<span class="lk">Fair vs Fixed </span><span class="lv">Fair ${fp(sw.fairNACQ,4)} | NPV/PV01 ${Math.abs(pv01)>0?((sw.npv/Math.abs(pv01)).toFixed(1)):"—"}bp atm</span>`;
 
   $('dot').classList.remove('busy');
+  try{updateStatusExtra();}catch(e){}
 }
 
 window.addEventListener('load',()=>{
@@ -2295,7 +2445,8 @@ function priceFRN(){
     ois_3:+$('ois_3').value/100,     ois_4:+$('ois_4').value/100,
     ois_5:+$('ois_5').value/100,     sw_j1:+$('sw_j1').value/100,
     sw_j2:+$('sw_j2').value/100,     sw_j3:+$('sw_j3').value/100,
-    sw_j5:+$('sw_j5').value/100,     sw_j10:+$('sw_j10').value/100,
+    sw_j5:+$('sw_j5').value/100,     sw_j7:+$('sw_j7').value/100,
+    sw_j10:+$('sw_j10').value/100,
     basis_on:+$('basis_on').value/10000, basis_3m:+$('basis_3m').value/10000,
     basis_6m:+$('basis_6m').value/10000, basis_9m:+$('basis_9m').value/10000,
     basis_1y:+$('basis').value/10000,
@@ -2662,6 +2813,22 @@ function priceFRN(){
   }
   const aiPerMillion = aiJIBAR / face * 1e6;
 
+  // ── Update primary summary row (first visible row) ──
+  const xirrDelta = isNaN(xirrOIS-xirrJIBAR) ? null : (xirrOIS-xirrJIBAR)*100;
+  const xirrDeltaCol = xirrDelta === null ? '' : (xirrDelta >= 0 ? 'g' : 'r');
+  const fsc = document.getElementById('fsum-jib-clean');
+  const fsd = document.getElementById('fsum-jib-dirty');
+  const fsf = document.getElementById('fsum-fair-spread');
+  const fsx = document.getElementById('fsum-xirr-delta');
+  const fsp = document.getElementById('fsum-cs01');
+  const fsxc = document.getElementById('fsum-xirr-card');
+  if(fsc) fsc.textContent = cleanPricePct.toFixed(4)+'%';
+  if(fsd) fsd.textContent = dirtyPricePct.toFixed(4)+'%';
+  if(fsf) fsf.textContent = fairOisSpreadBP.toFixed(1)+'bp';
+  if(fsx){ fsx.textContent = xirrDelta === null ? '—' : (xirrDelta>=0?'+':'')+xirrDelta.toFixed(1)+'bp'; }
+  if(fsxc){ fsxc.className = 'kc '+(xirrDeltaCol||'a'); fsx.className = 'kv '+(xirrDeltaCol||'a'); }
+  if(fsp) fsp.textContent = 'R '+fmt(Math.abs(cs01frn),0);
+
   $('frn-jibar-kpi').innerHTML =
     kc('l','Clean Price',cleanPricePct.toFixed(4)+'%','vs par · excl accrued')+
     kc('a','Dirty Price',dirtyPricePct.toFixed(4)+'%','full settlement price')+
@@ -2942,14 +3109,7 @@ function updateStatusExtra(){
     if(j&&$('sb-jibar3m')) $('sb-jibar3m').textContent=(+j.value).toFixed(2)+'%';
   }catch(e){}
 }
-// Hook into the existing compute via addEventListener on all inputs
-document.querySelectorAll('.if').forEach(function(el){
-  el.addEventListener('input',function(){
-    el.classList.add('changed');
-    setTimeout(function(){el.classList.remove('changed');},700);
-    updateStatusExtra();
-  });
-});
+// updateStatusExtra is called inside compute() — no separate listener needed
 
 // ═══════════════════════════════════════════════════════
 // MIGRATION GUIDE — live quick reference table update
@@ -2971,10 +3131,7 @@ window.addEventListener('load',function(){
     updateStatusExtra();
     updateGuide();
   },120);
-  // Also update guide on every input change
-  document.querySelectorAll('.if').forEach(function(el){
-    el.addEventListener('input',updateGuide);
-  });
+  // updateGuide called via compute() on every reprice
 });
 
 // ════════════════════════════════════════════════════════
@@ -3054,40 +3211,39 @@ async function fetchMktData() {
 function renderTicker(data) {
   const bonds = data.bonds || {};
   const fx = data.fx || {};
-  let html = '';
-  // Bond section
-  html += '<div class="tk-sec"><span class="tk-sec-lbl">SA BONDS</span>';
-  Object.entries(bonds).forEach(([n, b]) => {
+  let h = '';
+  // SA Bonds — static snapshot, no duplication
+  h += '<div class="tk-sec"><span class="tk-sec-lbl">SA BONDS</span>';
+  Object.entries(bonds).sort((a,b)=>a[1].years_to_maturity-b[1].years_to_maturity).forEach(([n, b]) => {
     const bp = (b.change_1d * 100);
     const cls = Math.abs(bp) < 0.05 ? 'tk-flat' : bp > 0 ? 'tk-dn' : 'tk-up';
     const arr = Math.abs(bp) < 0.05 ? '–' : bp > 0 ? '▲' : '▼';
-    html += '<div class="tk-item">' +
+    h += '<div class="tk-item">' +
       '<span class="tk-name">' + n + '</span>' +
       '<span class="tk-val">' + b.yield.toFixed(3) + '%</span>' +
       '<span class="' + cls + '">' + arr + Math.abs(bp).toFixed(1) + 'bp</span>' +
-      '<span class="tk-sub">' + b.years_to_maturity.toFixed(1) + 'y</span>' +
       '</div>';
   });
-  html += '</div>';
-  // Separator
-  html += '<div class="tk-sep"></div>';
-  // FX section
-  html += '<div class="tk-sec"><span class="tk-sec-lbl">FX</span>';
+  h += '</div><div class="tk-sep"></div>';
+  // FX
+  h += '<div class="tk-sec"><span class="tk-sec-lbl">FX</span>';
   Object.entries(fx).forEach(([pair, f]) => {
     const isZar = pair.includes('ZAR');
     const up = f.change_1d > 0;
-    const cls = Math.abs(f.change_1d) < 0.0001 ? 'tk-flat' : (isZar ? (up ? 'tk-dn' : 'tk-up') : (up ? 'tk-up' : 'tk-dn'));
+    const cls = Math.abs(f.change_1d) < 0.0001 ? 'tk-flat' : (isZar?(up?'tk-dn':'tk-up'):(up?'tk-up':'tk-dn'));
     const arr = Math.abs(f.change_1d) < 0.0001 ? '–' : up ? '▲' : '▼';
-    html += '<div class="tk-item">' +
+    h += '<div class="tk-item">' +
       '<span class="tk-name">' + pair.slice(0,3) + '/' + pair.slice(3) + '</span>' +
       '<span class="tk-val">' + f.rate.toFixed(4) + '</span>' +
       '<span class="' + cls + '">' + arr + Math.abs(f.change_1d).toFixed(4) + '</span>' +
       '</div>';
   });
-  html += '</div><div class="tk-sep"></div>';
-  // Duplicate for seamless loop
+  h += '</div>';
   const inner = document.getElementById('tk-inner');
-  if (inner) inner.innerHTML = html + html;
+  if (inner) inner.innerHTML = h;
+  // Update timestamp
+  const ts = document.getElementById('tk-ts');
+  if (ts) ts.textContent = data.timestamp || '';
 }
 
 function renderMktTab(data) {
