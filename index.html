@@ -425,6 +425,7 @@ td:first-child{text-align:left;color:var(--tx2);font-weight:600}
   <div class="tab" onclick="sw('scenario',this)"><span class="tdot"></span>SCENARIO</div>
   <div class="tab ftab" onclick="sw('frn',this)"><span class="tdot"></span>FRN PRICER ⟳</div>
   <div class="tab gtab" onclick="sw('critique',this)"><span class="tdot"></span>🇿🇦 MIGRATION GUIDE</div>
+  <div class="tab" onclick="sw('zaronia_idx',this)" style="color:var(--neon)">⚡ ZARONIA INDEX</div>
   <div class="tab" onclick="sw('mktdata',this)" style="color:var(--cyan)">📡 MARKET DATA</div>
 </div>
 <!-- ── OVERVIEW ── -->
@@ -837,6 +838,9 @@ td:first-child{text-align:left;color:var(--tx2);font-weight:600}
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="frn-xirr-panel"></div>
   </div>
 
+  <!-- ── CONVEXITY & CREDIT SPREAD ADJUSTMENT PANEL ── -->
+  <div id="frn-convexity-panel"></div>
+
   <!-- ── CHARTS ── -->
   <div class="cg c2">
     <div class="cb">
@@ -1080,6 +1084,96 @@ td:first-child{text-align:left;color:var(--tx2);font-weight:600}
 </div><!-- /tc-critique -->
 
 
+<!-- ── ZARONIA INDEX ── -->
+<div class="tc" id="tc-zaronia_idx">
+
+  <!-- ZARONIA Live Rate Card -->
+  <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:8px;margin-bottom:2px">
+    <div class="kc n" style="border-left:3px solid var(--neon)">
+      <div class="kl">ZARONIA O/N (SARB fixing)</div>
+      <div class="kv lg n" id="zi-on-rate">—</div>
+      <div class="ks">ZAR Overnight Index Average · ACT/365F · T+0 settlement</div>
+    </div>
+    <div class="kc n"><div class="kl">ZARONIA NACC</div><div class="kv n" id="zi-nacc">—</div><div class="ks">continuous equiv</div></div>
+    <div class="kc n"><div class="kl">ZARONIA NACQ</div><div class="kv n" id="zi-nacq">—</div><div class="ks">quarterly equiv</div></div>
+    <div class="kc r"><div class="kl">vs JIBAR 3M</div><div class="kv r" id="zi-vs-jibar">—</div><div class="ks">credit/term spread</div></div>
+    <div class="kc a"><div class="kl">vs Repo NACM</div><div class="kv a" id="zi-vs-repo">—</div><div class="ks">ZARONIA/repo spread</div></div>
+  </div>
+
+  <!-- Compounding Calculator -->
+  <div style="background:var(--bg2);border:1px solid var(--bd);border-left:3px solid var(--neon);border-radius:2px;padding:12px 14px">
+    <div class="sh"><span class="sa"></span>Term ZARONIA Compounding Calculator</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px">
+      <div><div class="kl" style="margin-bottom:4px">ZARONIA O/N Rate (%)</div>
+        <input class="if" id="zi-rate" type="number" step="0.01" value="6.60" style="width:100%"></div>
+      <div><div class="kl" style="margin-bottom:4px">Period (days)</div>
+        <input class="if" id="zi-days" type="number" step="1" value="91" style="width:100%"></div>
+      <div><div class="kl" style="margin-bottom:4px">Rate Volatility (σ, bp/day)</div>
+        <input class="if" id="zi-vol" type="number" step="0.1" value="2.5" style="width:100%"></div>
+      <div><div class="kl" style="margin-bottom:4px">Lookback (business days)</div>
+        <input class="if" id="zi-lookback" type="number" step="1" value="5" style="width:100%"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:7px" id="zi-compound-kpi"></div>
+  </div>
+
+  <!-- Convexity Theory -->
+  <div class="math-box" style="border-left-color:var(--neon)">
+    <h4 style="color:var(--neon)">📐 ZARONIA Daily Compounding — Convexity Adjustment vs JIBAR Simple Rate</h4>
+    ZARONIA compounds <strong>daily overnight fixings</strong> geometrically over the coupon period.
+    JIBAR is a <strong>simple forward-looking term rate</strong> set at period start.
+    The difference in compounding convention creates a <strong>convexity adjustment</strong> (Jensen's inequality):
+    <span class="fm">ZARONIA_term = ∏ᵢ(1 + r_ON_i × δᵢ) − 1 ≈ r_ON × T + ½ × σ² × T² (approx)</span>
+    For a flat rate r_ON over T days: ZARONIA_term ≈ r_ON × T/365 + ½ × σ²(T/365)²
+    <span class="fm">Convexity adj (bp) ≈ ½ × σ²(daily) × T² / 365² × 10000</span>
+    where σ is the daily rate volatility. For σ=2.5bp/day, T=91 days: adj ≈ <strong id="zi-conv-approx">—</strong>bp
+    <span class="fm">Credit spread: JIBAR − ZARONIA ≈ Term credit premium + Liquidity premium + Convexity adj</span>
+    <strong>JIBAR embeds:</strong> (1) bank credit risk over 3M horizon, (2) 3M liquidity premium, (3) panel fixing methodology risk.
+    <strong>ZARONIA embeds:</strong> (1) overnight risk-free rate only, (2) no term premium, (3) near risk-free.
+    <span class="ref">Ref: ISDA OIS compounding; Mercurio (2009); SARB MPG ZARONIA conventions; Hull &amp; White (2022) convexity</span>
+  </div>
+
+  <!-- Credit Spread Decomposition -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div>
+      <div class="sh"><span class="sa re"></span>JIBAR → ZARONIA Credit Spread Decomposition</div>
+      <div id="zi-spread-decomp"></div>
+    </div>
+    <div>
+      <div class="sh"><span class="sa"></span>Rate Convention Cross-Reference</div>
+      <div id="zi-convention-table"></div>
+    </div>
+  </div>
+
+  <!-- Compounding schedule chart -->
+  <div class="cg c2">
+    <div class="cb">
+      <div class="ct"><span class="ctd" style="background:var(--neon)"></span>ZARONIA Compound Growth over Quarter (flat rate assumption)</div>
+      <div class="cw" style="height:200px"><canvas id="c-zi-compound"></canvas></div>
+    </div>
+    <div class="cb">
+      <div class="ct"><span class="ctd" style="background:var(--red)"></span>JIBAR vs ZARONIA Spread — Credit + Convexity Decomposition (bp)</div>
+      <div class="cw" style="height:200px"><canvas id="c-zi-spread"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Lookback period explainer -->
+  <div class="math-box" style="border-left-color:var(--cyan)">
+    <h4 style="color:var(--cyan)">⏱ ZARONIA Lookback Period — 5 Johannesburg Business Days</h4>
+    SARB/MPG convention for ZARONIA-linked FRNs: the observation period ends <strong>5 Johannesburg business days</strong>
+    before the coupon payment date. This means:
+    <span class="fm">Observation period: [reset_date, pay_date − 5bd]  (5bd lookback, no shift)</span>
+    The last 5 overnight fixings before payment are <em>excluded</em> from compounding.
+    The coupon is therefore <strong>known 5 business days before payment</strong>, allowing settlement processing.
+    <span class="fm">Lookback effect (bp) ≈ ZARONIA_change_over_5bd × 5/365 × 10000</span>
+    For a 25bp rate move over the lookback period: lookback effect ≈ <strong id="zi-lookback-effect">—</strong>bp on the coupon.
+    <strong>Practical impact:</strong> In a falling rate environment, lookback gives a <em>higher</em> coupon than spot ZARONIA.
+    In a rising environment, it gives a <em>lower</em> coupon. This is the <strong>lookback basis risk</strong>.
+    <span class="ref">Ref: SARB MPG Working Paper on ZARONIA Conventions (2023); ISDA IBOR Fallback Supplement</span>
+  </div>
+
+</div><!-- /tc-zaronia_idx -->
+
+
 <!-- ── MARKET DATA ── -->
 <div class="tc" id="tc-mktdata">
 
@@ -1271,7 +1365,8 @@ function sw(name,el){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   $('tc-'+name).classList.add('on');
   el.classList.add('on');
-  setTimeout(()=>compute(false),50); // re-draw charts for newly visible tab
+  if(name==='zaronia_idx') setTimeout(()=>{ try{renderZaroniaIndex();}catch(e){} },50);
+  else setTimeout(()=>compute(false),50);
 }
 
 // ════════════════════════════════════════
@@ -2383,6 +2478,8 @@ ${jibC.sasw1Warn?`<span class="ls">⚠ ${jibC.sasw1Warn}</span><br>`:''}
 
   $('dot').classList.remove('busy');
   try{updateStatusExtra();}catch(e){}
+  // Update ZARONIA index if visible
+  if(document.getElementById('tc-zaronia_idx')?.classList.contains('on')) try{renderZaroniaIndex();}catch(e){}
 }
 
 window.addEventListener('load',()=>{
@@ -2866,6 +2963,112 @@ function priceFRN(){
       fairOisSpreadBP.toFixed(1)+'bp',
       `XIRR-equal spread · curr ${currentOisSpreadBP.toFixed(1)}bp`);
 
+  // ════════════════════════════════════════════════════════
+  // CONVEXITY & CREDIT SPREAD ADJUSTMENT PANEL
+  // Quantifies the theoretical adjustment needed to convert
+  // JIBAR (simple, in-advance) to ZARONIA (geometric, in-arrears)
+  // ════════════════════════════════════════════════════════
+  (()=>{
+    const cpanel = $('frn-convexity-panel');
+    if(!cpanel) return;
+
+    // Per-period convexity and credit spread breakdown
+    const sigma_d  = 2.5/10000;   // assumed daily ZARONIA vol (2.5bp/day)
+    let totalConvAdj=0, totalCreditPremium=0, totalLiqPremium=0;
+    let convRows='';
+
+    for(const r of pRecs){
+      const T_days   = r.daysInPrd;
+      const T_bd     = Math.round(T_days * 5/7);  // approx business days
+      // Convexity adj for this period: ½σ²T²/(2×365²) in bp
+      const conv_bp  = 0.5 * Math.pow(sigma_d,2) * T_days * T_days / (2*365*365) * 1e8;
+      // JIBAR vs ZARONIA spread for this period
+      const jibar_ann = r.jibRate*100;              // annualised %
+      const ois_ann   = r.oisRate*100;              // annualised %
+      const spread_bp = (jibar_ann - ois_ann)*100;  // total spread in bp
+      // Decompose: convexity + liquidity (~30%) + credit (residual)
+      const liq_bp   = Math.max(0, spread_bp * 0.30);
+      const cred_bp  = Math.max(0, spread_bp - conv_bp - liq_bp);
+      totalConvAdj       += conv_bp   * r.dt * face / 10000; // ZAR impact
+      totalCreditPremium += cred_bp   * r.dt * face / 10000;
+      totalLiqPremium    += liq_bp    * r.dt * face / 10000;
+      const statusStyle  = r.isLocked?'color:var(--lime)':r.afterConv?'color:var(--neon)':'color:var(--tx3)';
+      convRows += `<tr>
+        <td class="cb2">P${r.i}</td>
+        <td class="cd2">${T_days}d</td>
+        <td class="cb2">${(jibar_ann).toFixed(4)}%</td>
+        <td class="cn">${(ois_ann).toFixed(4)}%</td>
+        <td style="color:${spread_bp>0?'var(--red)':'var(--green)'};font-weight:700">${spread_bp.toFixed(1)}bp</td>
+        <td class="cn">${conv_bp.toFixed(3)}bp</td>
+        <td class="ca">${liq_bp.toFixed(1)}bp</td>
+        <td class="cr">${cred_bp.toFixed(1)}bp</td>
+        <td class="cd2" style="${statusStyle}">${r.isLocked?'LOCKED':r.afterConv?'POST-CONV':'PROJ'}</td>
+      </tr>`;
+    }
+
+    // Summary spread across all future periods (fair value credit spread adjustment)
+    const totalCFDiff = pRecs.reduce((s,r)=>s+(r.cf_jibar - r.cf_ois),0);
+    const totalPVDiff = pRecs.reduce((s,r)=>s+(r.pvJibar  - r.pvOis),0);
+    const weightedBasis = pRecs.length > 0
+      ? pRecs.reduce((s,r)=>s+((r.jibRate-r.oisRate)*100)*r.dt,0) / pRecs.reduce((s,r)=>s+r.dt,0) * 100
+      : 0;
+    const totalDT    = pRecs.reduce((s,r)=>s+r.dt,0);
+    const avgConvBP  = 0.5 * Math.pow(sigma_d,2) * (91*91) / (2*365*365) * 1e8;
+
+    cpanel.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--bd);border-left:3px solid var(--cyan);border-radius:2px;padding:12px 14px;margin-bottom:8px">
+      <div class="sh" style="margin-bottom:10px"><span class="sa cy"></span>ZARONIA Convexity & Credit Spread Adjustment — JIBAR vs ZARONIA Period Decomposition</div>
+
+      <!-- Summary KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-bottom:12px">
+        <div class="kc r"><div class="kl">Weighted Basis</div>
+          <div class="kv r">${weightedBasis.toFixed(1)}bp</div>
+          <div class="ks">JIBAR−ZARONIA avg</div></div>
+        <div class="kc n"><div class="kl">Convexity Adj (avg)</div>
+          <div class="kv n">${avgConvBP.toFixed(3)}bp</div>
+          <div class="ks">½σ²T² Jensen adj</div></div>
+        <div class="kc a"><div class="kl">Liquidity Premium</div>
+          <div class="kv a">${(weightedBasis*0.3).toFixed(1)}bp</div>
+          <div class="ks">~30% of total spread</div></div>
+        <div class="kc r"><div class="kl">Credit Premium</div>
+          <div class="kv r">${Math.max(0,weightedBasis*0.7-avgConvBP).toFixed(1)}bp</div>
+          <div class="ks">bank risk residual</div></div>
+        <div class="kc l"><div class="kl">Total CF Differential</div>
+          <div class="kv l">R ${fmt(totalCFDiff,0)}</div>
+          <div class="ks">JIBAR − ZARONIA CFs</div></div>
+        <div class="kc l"><div class="kl">Total PV Differential</div>
+          <div class="kv l">R ${fmt(totalPVDiff,0)}</div>
+          <div class="ks">JIBAR PV − OIS PV</div></div>
+      </div>
+
+      <!-- Fair Value Spread Note -->
+      <div style="background:rgba(0,255,212,.05);border:1px solid rgba(0,255,212,.2);border-radius:2px;padding:9px 12px;margin-bottom:10px;font-size:9.5px;color:var(--tx1);line-height:1.8">
+        <strong style="color:var(--neon)">Fair ZARONIA Spread Construction:</strong>
+        The ZARONIA spread = JIBAR issue spread (<strong>${(iSpread*10000).toFixed(0)}bp</strong>) + OIS/JIBAR basis (<strong>${(basisBP*10000).toFixed(0)}bp</strong>) = <strong>${((iSpread+basisBP)*10000).toFixed(0)}bp</strong> offered.
+        Of the <strong>${Math.abs(weightedBasis).toFixed(1)}bp</strong> JIBAR−ZARONIA differential:
+        ~<strong>${avgConvBP.toFixed(2)}bp</strong> is convexity (daily vs quarterly compounding, σ=2.5bp/day),
+        ~<strong>${(Math.max(0,weightedBasis)*0.3).toFixed(1)}bp</strong> is liquidity premium,
+        ~<strong>${Math.max(0,Math.max(0,weightedBasis)*0.7-avgConvBP).toFixed(1)}bp</strong> is bank credit premium.
+        <strong>Net credit spread adjustment required:</strong> the fair ZARONIA spread should compensate for ALL three components.
+        XIRR-fair spread = <strong>${fairOisSpreadBP.toFixed(1)}bp</strong> vs offered <strong>${currentOisSpreadBP.toFixed(1)}bp</strong>.
+      </div>
+
+      <!-- Period detail table -->
+      <details>
+        <summary style="cursor:pointer;font-size:9px;font-weight:700;color:var(--tx2);letter-spacing:.1em;text-transform:uppercase;list-style:none;display:flex;align-items:center;gap:6px;margin-bottom:6px">
+          <span style="color:var(--cyan)">▶</span> Period-by-Period Spread Decomposition
+        </summary>
+        <div class="tw" style="margin-top:6px"><table>
+          <thead><tr>
+            <th>Prd</th><th>Days</th><th>JIBAR%</th><th>ZARONIA%</th>
+            <th>Total Spread</th><th>Convexity</th><th>Liquidity</th><th>Credit</th><th>Status</th>
+          </tr></thead>
+          <tbody>${convRows}</tbody>
+        </table></div>
+      </details>
+    </div>`;
+  })();
+
   // ── DECISION PANEL ──
   const pxGain = oisCleanPct - cleanPricePct;
   const xirrGain = xirrOIS - xirrJIBAR;
@@ -3154,6 +3357,157 @@ window.addEventListener('load',function(){
     }
   });
 })();
+
+// ════════════════════════════════════════════════════════
+// ZARONIA INDEX TAB
+// ════════════════════════════════════════════════════════
+function renderZaroniaIndex(){
+  const zaronia = +$('zaronia').value;       // O/N % input
+  const jibar3m = +$('jibar3m').value;       // JIBAR 3M %
+  const repoNACM= +$('repo').value;          // Repo NACM %
+  const ziRate  = +($('zi-rate')?.value || zaronia);   // compounding calc input
+  const ziDays  = +($('zi-days')?.value || 91);
+  const ziVol   = +($('zi-vol')?.value  || 2.5);       // bp/day
+  const ziLB    = +($('zi-lookback')?.value || 5);
+
+  // ── Rate Convention conversions ──
+  const r = zaronia/100;
+  const nacc = 365*Math.log(1+r/365); // approx NACC from simple overnight
+  const nacq = 4*(Math.pow(1+r/365, 365/4)-1)*100;
+  const nacqDisp = nacq.toFixed(4)+'%';
+  const naccDisp = (nacc*100).toFixed(4)+'%';
+  const vsJibar  = (zaronia - jibar3m).toFixed(2);
+  const vsRepo   = (zaronia - repoNACM).toFixed(2);
+
+  const set = (id,v) => { const el=$(id); if(el) el.textContent=v; };
+  set('zi-on-rate', zaronia.toFixed(4)+'%');
+  set('zi-nacc',    naccDisp);
+  set('zi-nacq',    nacqDisp);
+  set('zi-vs-jibar',(+vsJibar>=0?'+':'')+vsJibar+'%');
+  set('zi-vs-repo', (+vsRepo>=0?'+':'')+vsRepo+'%');
+
+  // ── Term ZARONIA Compounding ──
+  const r_d = ziRate/100/365;                          // daily decimal
+  const T   = ziDays;
+  // Compound factor for flat rate over T days
+  const compFactor = Math.pow(1+r_d, T);
+  const termRate   = (compFactor-1)*365/T*100;         // annualised simple equiv
+  const termNACC   = Math.log(compFactor)/T*365*100;   // NACC
+  // Jensen's inequality convexity adjustment (second-order, variance of compounding)
+  // σ in bp/day → decimal: σ_d = ziVol/10000
+  const sigma_d    = ziVol/10000;
+  // Convexity adj ≈ ½ × σ²× T × (T-1)/2 ÷ 365² × 10000 bp (variance of daily sum)
+  // More precisely: E[compounded] > simple due to convexity of exp(∑rᵢ)
+  // Approx: conv_adj ≈ ½ × σ² × T × T/(2×365²) × 10000
+  const convAdj_bp = 0.5 * Math.pow(sigma_d,2) * T * T / (2*365*365) * 10e8;
+  // Lookback effect: last ziLB days excluded from compounding
+  // If rate moves by Δr over lookback, coupon changes by Δr × lookback/365
+  const lookbackEffect_bp = 0.25/100 * ziLB/365 * 10000; // assuming 25bp move
+
+  set('zi-conv-approx', convAdj_bp.toFixed(3));
+  set('zi-lookback-effect', lookbackEffect_bp.toFixed(3));
+
+  // KPI grid
+  const kpi = $('zi-compound-kpi');
+  if(kpi){
+    kpi.innerHTML = [
+      {cls:'n', lbl:'O/N Input', val:ziRate.toFixed(4)+'%', sub:'ZARONIA fixing'},
+      {cls:'n', lbl:'Term Rate (annualised)', val:termRate.toFixed(4)+'%', sub:'simple rate equiv'},
+      {cls:'n', lbl:'Term NACC', val:termNACC.toFixed(4)+'%', sub:'continuous equiv'},
+      {cls:'a', lbl:'Compound Factor', val:compFactor.toFixed(8), sub:T+' daily fixings'},
+      {cls:'r', lbl:'Convexity Adj', val:convAdj_bp.toFixed(3)+'bp', sub:'Jensen ½σ²T² approx'},
+      {cls:'b', lbl:'Lookback Basis', val:lookbackEffect_bp.toFixed(3)+'bp', sub:ziLB+'bd excl, 25bp move'},
+    ].map(({cls,lbl,val,sub})=>`<div class="kc ${cls}"><div class="kl">${lbl}</div><div class="kv ${cls}">${val}</div><div class="ks">${sub}</div></div>`).join('');
+  }
+
+  // ── Credit Spread Decomposition ──
+  const spreadTotal_bp = (jibar3m - zaronia)*100;  // total JIBAR-ZARONIA in bp
+  // Decompose: convexity + liquidity + credit (residual)
+  const convex_bp   = convAdj_bp;
+  const liquidity_bp = Math.max(0, spreadTotal_bp * 0.30);  // ~30% liquidity premium
+  const credit_bp    = Math.max(0, spreadTotal_bp - convex_bp - liquidity_bp);
+  const decomp = $('zi-spread-decomp');
+  if(decomp){
+    const row=(lbl,val,col,pct)=>`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+        <div style="width:130px;font-size:10px;color:var(--tx2)">${lbl}</div>
+        <div style="flex:1;background:var(--bg3);border-radius:1px;height:14px;position:relative">
+          <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:${col};border-radius:1px;opacity:.7"></div>
+        </div>
+        <div style="width:52px;text-align:right;font-size:11px;font-weight:700;color:${col}">${val}</div>
+      </div>`;
+    decomp.innerHTML =
+      row('Total spread',   spreadTotal_bp.toFixed(1)+'bp','var(--tx1)',100)+
+      row('Convexity adj',  convex_bp.toFixed(2)+'bp',     'var(--neon)', Math.min(100,convex_bp/spreadTotal_bp*100))+
+      row('Liquidity prem', liquidity_bp.toFixed(1)+'bp',  'var(--gold)', Math.min(100,liquidity_bp/spreadTotal_bp*100))+
+      row('Credit premium', credit_bp.toFixed(1)+'bp',     'var(--red)',  Math.min(100,credit_bp/spreadTotal_bp*100))+
+      `<div style="font-size:8.5px;color:var(--tx3);margin-top:6px;line-height:1.8">
+        Credit = residual after convexity &amp; liquidity.<br>
+        Liquidity = estimated ~30% of total spread.<br>
+        Convexity = Jensen adj for daily compounding.
+      </div>`;
+  }
+
+  // ── Convention cross-reference table ──
+  const ctbl = $('zi-convention-table');
+  if(ctbl){
+    const r_z=zaronia/100, r_j=jibar3m/100, r_repo=repoNACM/100;
+    const eff_z  = (Math.pow(1+r_z/365,365)-1)*100;
+    const eff_j  = (Math.pow(1+r_j/4,4)-1)*100;
+    const eff_r  = (Math.pow(1+r_repo/12,12)-1)*100;
+    ctbl.innerHTML=`<div class="tw"><table>
+      <thead><tr><th>Rate</th><th>As quoted</th><th>Convention</th><th>Eff Annual%</th><th>NACQ%</th></tr></thead>
+      <tbody>
+        <tr><td class="cn">ZARONIA O/N</td><td class="cn">${zaronia.toFixed(4)}%</td><td class="cd2">Simple/daily</td>
+            <td class="cn">${eff_z.toFixed(4)}%</td><td class="cn">${(4*(Math.pow(1+r_z/365,365/4)-1)*100).toFixed(4)}%</td></tr>
+        <tr><td class="cb2">JIBAR 3M</td><td class="cb2">${jibar3m.toFixed(4)}%</td><td class="cd2">Simple/quarterly</td>
+            <td class="cb2">${eff_j.toFixed(4)}%</td><td class="cb2">${jibar3m.toFixed(4)}%</td></tr>
+        <tr><td class="cp">Repo NACM</td><td class="cp">${repoNACM.toFixed(4)}%</td><td class="cd2">Monthly cpd</td>
+            <td class="cp">${eff_r.toFixed(4)}%</td><td class="cp">${(4*(Math.exp(nacmToNACC(r_repo)/4)-1)*100).toFixed(4)}%</td></tr>
+        <tr><td class="ca">Term ZARONIA</td><td class="ca">${termRate.toFixed(4)}%</td><td class="cd2">${T}d compound</td>
+            <td class="ca">${((Math.pow(compFactor,365/T)-1)*100).toFixed(4)}%</td>
+            <td class="ca">${(4*(Math.pow(compFactor,365/(T*4))-1)*100).toFixed(4)}%</td></tr>
+      </tbody></table></div>`;
+  }
+
+  // ── Compound growth chart ──
+  const days = Array.from({length:T+1},(_,i)=>i);
+  const growthData = days.map(d=>+((Math.pow(1+r_d,d)-1)*100).toFixed(6));
+  const simpleData = days.map(d=>+(r_d*d*100).toFixed(6));
+  mkChart('c-zi-compound','line',days.filter((_,i)=>i%7===0||i===T).map(d=>'D'+d),
+    [
+      {label:'Compound (geometric)',data:growthData.filter((_,i)=>i%7===0||i===T),
+        borderColor:'#00ffd4',backgroundColor:'rgba(0,255,212,.06)',borderWidth:2,pointRadius:2,tension:.3,fill:true},
+      {label:'Simple (linear)',data:simpleData.filter((_,i)=>i%7===0||i===T),
+        borderColor:'rgba(255,200,50,.6)',borderWidth:1.5,pointRadius:2,tension:.3,borderDash:[4,3]}
+    ],{yTitle:'Cumulative return %'});
+
+  // ── Spread decomposition chart ──
+  const tenors=['O/N','1M','2M','3M','6M','9M','1Y'];
+  // Rough spread curve: increases with term due to term premium
+  const totalSpreads = [zaronia-jibar3m, -0.10, -0.12, jibar3m-zaronia>0?-(jibar3m-zaronia):0.16,
+    -0.18,-0.20,-0.22].map(v=>Math.abs(v)*100);
+  const convexAdjs  = tenors.map((_,i)=>+(convAdj_bp*(i+1)/7).toFixed(2));
+  const credAdjs    = totalSpreads.map((t,i)=>Math.max(0,t-convexAdjs[i]-t*0.3));
+  const liqAdjs     = totalSpreads.map(t=>+(t*0.3).toFixed(2));
+  mkChart('c-zi-spread','bar',tenors,
+    [
+      {label:'Credit premium',data:credAdjs,backgroundColor:'rgba(255,51,85,.5)',borderColor:'#ff3355',borderWidth:1,stack:'s'},
+      {label:'Liquidity premium',data:liqAdjs,backgroundColor:'rgba(255,200,50,.4)',borderColor:'#ffc832',borderWidth:1,stack:'s'},
+      {label:'Convexity adj',data:convexAdjs,backgroundColor:'rgba(0,255,212,.35)',borderColor:'#00ffd4',borderWidth:1,stack:'s'},
+    ],{opts:{plugins:{tooltip:{mode:'index',intersect:false}},scales:{x:{stacked:true},y:{stacked:true}}}});
+}
+
+// Wire ZARONIA index inputs to re-render
+window.addEventListener('load',()=>{
+  ['zi-rate','zi-days','zi-vol','zi-lookback'].forEach(id=>{
+    const el=$(id);
+    if(el){
+      el.addEventListener('input', ()=>{ try{renderZaroniaIndex();}catch(e){} });
+      el.addEventListener('change',()=>{ try{renderZaroniaIndex();}catch(e){} });
+    }
+  });
+});
 
 // ════════════════════════════════════════════════════════
 // LIVE MARKET DATA — api.theyield.co.za/rates
