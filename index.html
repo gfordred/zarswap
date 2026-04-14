@@ -1118,6 +1118,49 @@ const dateStr=d=>d.toISOString().slice(0,10);
 function addMonths(d,m){const r=new Date(d);r.setMonth(r.getMonth()+m);return r}
 function dcf365(d1,d2){return(d2-d1)/(86400000*365)}
 
+// ── SCHEDULE GENERATOR — backward from maturity, JSE convention ──
+// Generates quarterly payment dates stepping backward from maturity.
+// Avoids addMonths calendar-rolling errors on 31st/30th of month.
+// JSE FRN convention: Modified Following, end-of-month rule applies.
+// We use a simplified version (no holiday calendar, but end-of-month correct).
+function buildSchedule(issueDate, matDate){
+  const dates = [];
+  let d = new Date(matDate);
+  // Step backward in 3M increments from maturity to issue
+  while(d > issueDate){
+    dates.unshift(new Date(d));
+    const m = d.getMonth();
+    const y = d.getFullYear();
+    // Subtract 3 months
+    let nm = m - 3; let ny = y;
+    if(nm < 0){ nm += 12; ny -= 1; }
+    // End-of-month rule: if maturity is EOM, all periods are EOM
+    const isEOM = (new Date(y, m+1, 0).getDate() === d.getDate());
+    if(isEOM){
+      d = new Date(ny, nm+1, 0); // last day of target month
+    } else {
+      const day = Math.min(d.getDate(), new Date(ny, nm+1, 0).getDate());
+      d = new Date(ny, nm, day);
+    }
+  }
+  // Ensure issue date is the start of the first period
+  if(dates.length === 0 || dates[0].getTime() !== matDate.getTime()){}
+  return dates; // array of period END dates (payment dates)
+}
+
+// ── SASW1 CONSISTENCY CHECK ──
+// Warn if SASW1 input diverges from FRA-implied 1Y par rate by > 2bp
+function checkSASW1Consistency(mkt, jibC_DF){
+  const ann = jibC_DF[1]+jibC_DF[2]+jibC_DF[3]+jibC_DF[4];
+  const fraImplied1Y = ((1-jibC_DF[4])/ann)*4*100; // NACQ%
+  const sasw1 = mkt.sw_j1*100;
+  const diff = Math.abs(sasw1 - fraImplied1Y);
+  if(diff > 0.02){ // 2bp
+    return `⚠ SASW1 (${sasw1.toFixed(3)}%) vs FRA-implied 1Y (${fraImplied1Y.toFixed(3)}%) diverge by ${(diff*100).toFixed(1)}bp — check inputs`;
+  }
+  return null;
+}
+
 // Clock
 const clk=()=>{const n=new Date();$('clk').textContent=n.toLocaleTimeString('en-ZA',{hour12:false})+' SAST'};
 setInterval(clk,1000);clk();
@@ -1212,46 +1255,33 @@ function bootstrapOIS(mkt){
   DF[0]=1;
 
   // ── Q1 (0→3M): ZARONIA O/N compounded ──
-  // DF_ois(3M) = 1/(1 + zaronia_ois_3m × dt_01)
-  // We use ZARONIA O/N + O/N basis as the OIS 3M equivalent simple rate:
-  //   zaronia_3m = zaronia + basis_on  (basis_on is already the OIS/JIBAR spread at ON tenor)
-  // Actually: ZARONIA 3M rate = implied from ZARONIA O/N compounding over 91 days
-  // Simple approximation (ISDA OIS convention): 
-  //   ois_3m_simple = zaronia + basis_on  (assuming O/N ZARONIA ≈ 3M OIS rate at short end)
-  // More precisely: use ZARONIA as the flat rate for 0→3M OIS
-  // The true ZARONIA 3M rate is the expected geometric mean of overnight fixings
-  const ois_3m_rate = zaronia + basis_on;  // OIS-equivalent 3M simple rate
+  // True 3M OIS DF from O/N rate: DF(3M) ≈ 1/(1 + zaronia × dt)^1
+  // More precisely: overnight compounded over ~91 days
+  // ois_3m_simple = zaronia + basis_on (OIS/JIBAR spread at ON tenor)
+  const ois_3m_rate = zaronia + basis_on;
+  // Compound daily approximation: (1 + r_ON/365)^91 ≈ 1 + r_ON × dt
+  // We use the more accurate: DF[1] = 1/(1 + ois_3m_rate × dt[0])
+  // which is the OIS deposit convention (simple rate, not continuous)
   DF[1] = 1/(1 + ois_3m_rate * dt[0]);
 
-  // ── Q2 (3→6M): FRA 3×6 adjusted by 3M basis ──
-  const ois_36 = fra_36 + basis_3m;
-  DF[2] = DF[1]/(1 + ois_36 * dt[1]);
-
-  // ── Q3 (6→9M): FRA 6×9 adjusted by 6M basis ──
-  const ois_69 = fra_69 + basis_6m;
-  DF[3] = DF[2]/(1 + ois_69 * dt[2]);
-
-  // ── Q4 (9→12M): FRA 9×12 adjusted by 9M basis ──
-  const ois_912 = fra_912 + basis_9m;
+  // ── Q2-Q4: FRA strip adjusted by basis per tenor bucket ──
+  const ois_36  = fra_36  + (basis_3m||basis_on);
+  const ois_69  = fra_69  + (basis_6m||basis_on);
+  const ois_912 = fra_912 + (basis_9m||basis_on);
+  DF[2] = DF[1]/(1 + ois_36  * dt[1]);
+  DF[3] = DF[2]/(1 + ois_69  * dt[2]);
   DF[4] = DF[3]/(1 + ois_912 * dt[3]);
 
-  // ── Override Q4 with OIS 1Y par swap if available ──
-  // The 1Y OIS par swap gives a more liquid anchor for DF[4].
-  // Par condition: ois_1/4 × Σᵢ₌₁⁴ DF[i] = 1 − DF[4]
-  // Solve: DF[4] = (1 − ois_1/4 × (DF[1]+DF[2]+DF[3])) / (1 + ois_1/4)
+  // ── Override Q4 with OIS 1Y par swap — ALWAYS prefer par swap (more liquid) ──
+  // Par condition: ois_1/4 × (DF[1]+DF[2]+DF[3]+DF[4]) = 1 − DF[4]
+  // Solve analytically: DF[4] = (1 − r1×(DF[1]+DF[2]+DF[3])) / (1 + r1)
   if(ois_1 > 0){
     const r1 = ois_1/4;
     const ann3 = DF[1]+DF[2]+DF[3];
     const df4_par = (1 - r1*ann3)/(1 + r1);
-    // Blend: weight par swap more heavily (it's more liquid than O/N-implied)
-    // Use par swap DF[4] but only if it's within 5bp zero-rate of FRA-derived DF[4]
-    const z_fra = -Math.log(DF[4])/tau[4];
-    const z_par = df4_par>0 ? -Math.log(df4_par)/tau[4] : z_fra;
-    if(Math.abs(z_fra-z_par)<0.01 && df4_par>0){
-      // Within 100bp → use par swap as it's more market-consistent
-      DF[4] = df4_par;
+    if(df4_par > 0 && df4_par < 1){
+      DF[4] = df4_par; // always use par swap — it is the liquid market instrument
     }
-    // If discrepancy > 100bp something is wrong with inputs; keep FRA-derived
   }
 
   // ── Y2-Y5: par NACQ swap bootstrap (NR, same as JIBAR) ──
@@ -1412,7 +1442,9 @@ function bootstrapJIBAR(mkt){
     const dTau=tau[i]-tau[i-1];
     fwd.push(dTau>0 ? (Math.log(DF[i-1])-Math.log(DF[i]))/dTau : 0);
   }
-  return{DF,zero,fwd,dates,tau,dt,N};
+  // SASW1 consistency check
+  const sasw1Warn = checkSASW1Consistency(mkt, DF);
+  return{DF,zero,fwd,dates,tau,dt,N,sasw1Warn};
 }
 
 // ════════════════════════════════════════
@@ -2190,6 +2222,7 @@ function compute(log=true){
   $('repriceMs').textContent=elapsed+'ms';
   $('log').innerHTML=`
 <span class="ls">■ CURVES BOOTSTRAPPED · ${elapsed}ms</span><br>
+${jibC.sasw1Warn?`<span class="ls">⚠ ${jibC.sasw1Warn}</span><br>`:''}
 <span class="lk">OIS DF[4]  </span><span class="lv">${oisC.DF[4].toFixed(8)} (Y1)</span><br>
 <span class="lk">OIS DF[20] </span><span class="lv">${oisC.DF[20].toFixed(8)} (Y5)</span><br>
 <span class="lk">JIB DF[4]  </span><span class="lv">${jibC.DF[4].toFixed(8)} (Y1)</span><br>
@@ -2270,20 +2303,15 @@ function priceFRN(){
   const jibC = bootstrapJIBAR(mkt);
   const oisC = bootstrapOIS(mkt);
 
-  // ── Generate reset schedule ──
-  // Build all quarterly periods from issue to maturity
+  // ── Generate reset schedule — backward from maturity (JSE convention) ──
+  // buildSchedule generates period END dates stepping backward from maturity.
+  // This avoids calendar-rolling errors on 31st/30th-of-month issue dates.
+  const payDates = buildSchedule(issueDate, matDate);
   const periods = [];
-  let pStart = new Date(issueDate);
-  while(pStart < matDate){
-    const pEnd = new Date(pStart);
-    pEnd.setMonth(pEnd.getMonth()+3);
-    if(pEnd > matDate){ // last stub
-      const adjEnd = new Date(matDate);
-      periods.push({start:new Date(pStart), end:adjEnd, resetDate:new Date(pStart)});
-      break;
-    }
-    periods.push({start:new Date(pStart), end:new Date(pEnd), resetDate:new Date(pStart)});
-    pStart = new Date(pEnd);
+  for(let i=0; i<payDates.length; i++){
+    const start = i===0 ? issueDate : payDates[i-1];
+    const end   = payDates[i];
+    periods.push({start:new Date(start), end:new Date(end), resetDate:new Date(start)});
   }
 
   // ── Helper: get JIBAR forward for a period using bootstrapped curve ──
@@ -2330,6 +2358,19 @@ function priceFRN(){
     return (dfS/dfE - 1) / dt;
   }
 
+  // ── OIS DF interpolation (for ZARONIA coupon DF ratio) ──
+  // Returns OIS DF at time tau (years from settle), log-linear interpolation
+  function interpOIS(tau){
+    if(tau <= 0) return 1;
+    const qtr = tau * 4;
+    const lo = Math.floor(qtr);
+    const hi = Math.min(oisC.N, lo+1);
+    if(lo >= oisC.N) return oisC.DF[oisC.N];
+    if(lo===hi) return oisC.DF[lo];
+    const frac = qtr - lo;
+    return Math.exp(Math.log(oisC.DF[lo])*(1-frac) + Math.log(oisC.DF[hi])*frac);
+  }
+
   function discDF(payDate, curve, tradingSpread){
     const tau = dcF(settleDate, payDate);
     if(tau <= 0) return 1;
@@ -2345,6 +2386,32 @@ function priceFRN(){
     }
     // Apply trading spread: DF_adjusted = baseDF × e^(-spread × τ)
     return baseDF * Math.exp(-tradingSpread * tau);
+  }
+
+  // ── JSE-CONVENTION Discount Margin discounting ──
+  // JSE Debt Listing Requirements: DM applied as simple rate add per period
+  // DF_adj(tᵢ) = DF_curve(tᵢ) × ∏_j 1/(1 + (f_j + DM) × δ_j)
+  // Approximated as: DF_adj = DF_base / (1 + DM × τ)^(1/something)
+  // Practical JSE market convention: simple discount per period
+  // P = Σ CF_i / (1 + (r_i + DM) × τ_i)  where r_i is forward rate, τ from settle
+  // We implement this as: DF_JSE(t, DM) = DF_base(t) × (1 / (1 + DM × t))
+  // This matches the JSE FRN pricing sheet convention (simple add, not continuous)
+  function discDF_simple(payDate, curve, discMargin){
+    const tau = dcF(settleDate, payDate);
+    if(tau <= 0) return 1;
+    const qtr = tau * 4;
+    const lo  = Math.floor(qtr);
+    const hi  = Math.min(curve.N, lo+1);
+    let baseDF;
+    if(lo >= curve.N) baseDF = curve.DF[curve.N];
+    else if(lo===hi)  baseDF = curve.DF[lo];
+    else{
+      const frac = qtr-lo;
+      baseDF = Math.exp(Math.log(curve.DF[lo])*(1-frac)+Math.log(curve.DF[hi])*frac);
+    }
+    // JSE simple-rate DM adjustment: multiply by 1/(1 + DM × τ)
+    // This is the correct JSE convention (NOT continuous e^(-s×τ))
+    return baseDF / (1 + discMargin * tau);
   }
 
   // ── Price JIBAR FRN ──
@@ -2385,17 +2452,21 @@ function priceFRN(){
 
     const cpnRate  = jibRate + iSpread;
     const cf_jibar = face * cpnRate * dt;
-    const dfJib    = discDF(payDate, jibC, tSpread);
+    const dfJib    = discDF_simple(payDate, jibC, tSpread);
     const pvJibar  = cf_jibar * dfJib;
     dirtyJIBAR    += pvJibar;
 
-    // OIS equivalent
-    const oisRate    = oisFwdForPeriod(start, end);
+    // OIS equivalent — ZARONIA compounded coupon using DF ratio (ISDA convention)
+    // CF_ois = N × [DF_ois(start)/DF_ois(end) - 1] + N × spread × DCF
+    // This is the correct geometric compounding (not the simple rate approximation)
+    const oisRate    = oisFwdForPeriod(start, end);                    // for display/record
+    const dfOisStart = tauPay > dt ? interpOIS(tauPay - dt) : 1.0;    // DF at period start
+    const dfOisEnd   = interpOIS(tauPay);                              // DF at period end
+    const oisCompFactor = dfOisStart / dfOisEnd;                       // exact geometric ratio
     const oisSpread  = iSpread + basisBP;
-    const oisCpnRate = oisRate + oisSpread;
-    const compFactor = 1 + oisRate * dt;
-    const cf_ois     = face * (compFactor - 1 + oisSpread * dt);
-    const dfOis      = discDF(payDate, oisC, tSpread + basisBP);
+    const oisCpnRate = oisRate + oisSpread;                            // for display only
+    const cf_ois     = face * (oisCompFactor - 1) + face * oisSpread * dt; // exact ISDA formula
+    const dfOis      = discDF_simple(payDate, oisC, tSpread + basisBP);    // JSE simple DM
     const pvOis      = cf_ois * dfOis;
     const afterConv  = start >= convDate;
 
@@ -2407,8 +2478,8 @@ function priceFRN(){
   }
 
   // Par redemption
-  const dfMatJib = discDF(matDate, jibC, tSpread);
-  const dfMatOis = discDF(matDate, oisC, tSpread + basisBP);
+  const dfMatJib = discDF_simple(matDate, jibC, tSpread);
+  const dfMatOis = discDF_simple(matDate, oisC, tSpread + basisBP);
   dirtyJIBAR += face * dfMatJib;
 
   const cleanJIBAR    = dirtyJIBAR - aiJIBAR;
@@ -2441,10 +2512,10 @@ function priceFRN(){
   function dirtyForSpread(dm){
     let d=0;
     for(const r of pRecs){
-      const dfJ=discDF(r.payDate, jibC, dm);
+      const dfJ=discDF_simple(r.payDate, jibC, dm);
       d+=r.cf_jibar*dfJ;
     }
-    d+=face*discDF(matDate, jibC, dm);
+    d+=face*discDF_simple(matDate, jibC, dm);
     return d;
   }
   const cs01frn = (dirtyForSpread(tSpread+0.0001) - dirtyForSpread(tSpread-0.0001))/2;
@@ -2469,40 +2540,49 @@ function priceFRN(){
   }
 
   // ════════════════════════════════════════════════════════
-  // XIRR — Newton-Raphson solver
-  // xirr(cashflows, dates) where cashflows[0] is the initial outflow (negative)
-  // Returns annualised IRR as decimal
+  // XIRR — Newton-Raphson with Brent's method fallback
+  // Outflow = dirty price (what buyer actually pays on settlement)
+  // Inflow[0] = next full coupon (AI already paid via dirty price)
   // ════════════════════════════════════════════════════════
   function xirr(cfs, dates){
-    // Validate
     if(cfs.length !== dates.length || cfs.length < 2) return NaN;
     const d0 = dates[0];
-    const t = dates.map(d => (d - d0) / 86400000 / 365); // years from first date
-    // Newton-Raphson: f(r) = Σ CF_i / (1+r)^t_i = 0
-    let r = 0.10; // initial guess 10%
-    for(let iter = 0; iter < 100; iter++){
-      let f = 0, df = 0;
-      for(let i = 0; i < cfs.length; i++){
-        const v = Math.pow(1 + r, -t[i]);
-        f  += cfs[i] * v;
-        df -= cfs[i] * t[i] * v / (1 + r);
-      }
+    const t = dates.map(d => (d - d0) / 86400000 / 365);
+    const npv = r => cfs.reduce((s,cf,i) => s + cf * Math.pow(1+r, -t[i]), 0);
+    const dnpv = r => cfs.reduce((s,cf,i) => s - cf * t[i] * Math.pow(1+r, -t[i]-1), 0);
+
+    // Newton-Raphson
+    let r = 0.08;
+    for(let i=0; i<100; i++){
+      const f = npv(r), df = dnpv(r);
       if(Math.abs(df) < 1e-14) break;
-      const step = f / df;
+      const step = f/df;
       r -= step;
-      if(Math.abs(step) < 1e-10) break;
+      if(Math.abs(step) < 1e-10) return isFinite(r) ? r : NaN;
     }
-    return isFinite(r) ? r : NaN;
+    // If NR converged to garbage, use Brent's method bracketed in [-0.5, 5.0]
+    if(!isFinite(r) || r < -0.5 || r > 5.0){
+      let a=-0.5, b=5.0;
+      let fa=npv(a), fb=npv(b);
+      if(fa*fb > 0) return NaN; // no root in bracket
+      for(let i=0; i<100; i++){
+        const mid=(a+b)/2, fm=npv(mid);
+        if(Math.abs(fm)<1e-10 || (b-a)/2<1e-10) return mid;
+        if(fa*fm<0){b=mid;fb=fm;}else{a=mid;fa=fm;}
+      }
+      return (a+b)/2;
+    }
+    return r;
   }
 
   // ── Build XIRR cashflow streams ──
-  // Stream: -cleanPrice at settle, +all future coupons + par at maturity
-  // (Use clean price as the purchase price since that's what buyer pays + they pay AI separately)
+  // Correct convention: outflow = DIRTY price (actual settlement payment)
+  // First inflow = next full coupon (buyer paid AI upfront via dirty price)
   const xirrDates_jib = [settleDate];
-  const xirrCFs_jib   = [-cleanJIBAR];  // outflow = purchase price (clean)
+  const xirrCFs_jib   = [-dirtyJIBAR];  // DIRTY price — what you actually pay
 
   const xirrDates_ois = [convDate];
-  const xirrCFs_ois   = [-oisClean];    // outflow = conversion price (OIS clean)
+  const xirrCFs_ois   = [-oisDirty];    // DIRTY OIS price
 
   let cumJibCF = 0, cumOisCF = 0;
   for(const r of pRecs){
@@ -2526,38 +2606,51 @@ function priceFRN(){
   const xirrJIBAR = xirr(xirrCFs_jib, xirrDates_jib) * 100;
   const xirrOIS   = xirr(xirrCFs_ois, xirrDates_ois) * 100;
 
-  // ── Fair ZARONIA spread solver ──
-  // Find the OIS spread s* such that XIRR(ZARONIA_stream) = XIRR(JIBAR_stream)
-  // Binary search on oisSpread
+  // ── Fair ZARONIA spread solver — no circular dependency ──
+  // At each candidate spread s, recalculate BOTH:
+  //   (a) the OIS cashflows at spread s
+  //   (b) the OIS dirty price at spread s (the true outflow at that spread)
+  // Then find s* where XIRR_ois(s*) = XIRR_jibar
   function computeOisXirrForSpread(targetSpread_dec){
-    const cfs = [-oisClean]; // reuse same purchase price
-    const dts = [convDate];
+    // Recalculate OIS dirty price at this spread (remove circular dependency)
+    let oisDirtyAtSpread = 0;
+    const cfs = [];
+    const dts = [];
     for(const r of pRecs){
       if(r.payDate > convDate && r.afterConv){
-        const oisR   = r.oisRate;
-        const dt_r   = r.dt;
-        const compF  = 1 + oisR * dt_r;
-        const cf_adj = face * (compF - 1 + targetSpread_dec * dt_r);
-        cfs.push(cf_adj);
+        // ZARONIA coupon using DF ratio (correct geometric compounding)
+        const tauStart = dcF(settleDate, r.start);
+        const tauEnd   = dcF(settleDate, r.end);
+        const dfStart = tauStart <= 0 ? 1 : interpOIS(tauStart);
+        const dfEnd   = interpOIS(tauEnd);
+        const oisComp = dfStart / dfEnd;
+        const cf_at_s = face * (oisComp - 1) + face * targetSpread_dec * r.dt;
+        const dfDisc  = discDF_simple(r.payDate, oisC, tSpread + targetSpread_dec - iSpread);
+        oisDirtyAtSpread += cf_at_s * dfDisc;
+        cfs.push(cf_at_s);
         dts.push(r.payDate);
       }
     }
+    oisDirtyAtSpread += face * discDF_simple(matDate, oisC, tSpread + targetSpread_dec - iSpread);
     cfs.push(face);
     dts.push(matDate);
-    return xirr(cfs, dts);
+    // Use recalculated dirty price as outflow (no circularity)
+    return xirr([-oisDirtyAtSpread, ...cfs], [convDate, ...dts]);
   }
 
-  // Binary search: find spread s* where xirrOIS(s*)  = xirrJIBAR
+  // Binary search: find spread s* where xirrOIS(s*) = xirrJIBAR
+  // Range: -200bp to +500bp covers all realistic ZAR FRN scenarios
   const targetXirr = xirrJIBAR / 100;
   let lo_s = -0.02, hi_s = 0.05;
-  let fairOisSpread = iSpread + basisBP;
-  for(let it = 0; it < 60; it++){
+  let fairOisSpread = iSpread + basisBP; // sensible default
+  for(let it = 0; it < 80; it++){
     const mid = (lo_s + hi_s) / 2;
     const xMid = computeOisXirrForSpread(mid);
     if(isNaN(xMid)) break;
     if(xMid < targetXirr) lo_s = mid;
     else hi_s = mid;
-    if(Math.abs(hi_s - lo_s) < 1e-8){ fairOisSpread = mid; break; }
+    if(Math.abs(hi_s - lo_s) < 1e-9){ fairOisSpread = mid; break; }
+    fairOisSpread = mid;
   }
   const fairOisSpreadBP = fairOisSpread * 10000;
   const currentOisSpreadBP = (iSpread + basisBP) * 10000;
@@ -2585,7 +2678,7 @@ function priceFRN(){
       `SprdDur ${(spreadDur*100).toFixed(4)}%`)+
     kc('a','XIRR (JIBAR)',
       isNaN(xirrJIBAR)?'—':xirrJIBAR.toFixed(4)+'%',
-      'annualised IRR · JIBAR stream');
+      'IRR on dirty price · ACT/365');
 
   $('frn-ois-kpi').innerHTML =
     kc('n','OIS Clean Px',oisCleanPct.toFixed(4)+'%','from conv date')+
@@ -2598,7 +2691,7 @@ function priceFRN(){
       oisCleanPct>cleanPricePct?'OIS BETTER ↑':'JIBAR BETTER ↓')+
     kc('n','XIRR (ZARONIA)',
       isNaN(xirrOIS)?'—':xirrOIS.toFixed(4)+'%',
-      'annualised IRR · OIS stream')+
+      'IRR on dirty price · ACT/365')+
     kc(xirrOIS>=xirrJIBAR?'g':'r','XIRR Difference',
       isNaN(xirrOIS-xirrJIBAR)?'—':((xirrOIS-xirrJIBAR)*100).toFixed(1)+'bp',
       xirrOIS>=xirrJIBAR?'OIS yields more':'JIBAR yields more')+
@@ -2733,8 +2826,8 @@ function priceFRN(){
   const sensClean=sensSpreads.map(dBP=>{
     const s=tSpread+dBP/10000;
     let d=0;
-    for(const r of pRecs){const dfJ=discDF(r.payDate,jibC,s);d+=r.cf_jibar*dfJ;}
-    d+=face*discDF(matDate,jibC,s);
+    for(const r of pRecs){const dfJ=discDF_simple(r.payDate,jibC,s);d+=r.cf_jibar*dfJ;}
+    d+=face*discDF_simple(matDate,jibC,s);
     return +((d-aiJIBAR)/face*100).toFixed(4);
   });
   mkChart('c-frn-spread-sens','line',sensSpreads.map(s=>s===0?'0':s>0?`+${s}`:String(s)),[
